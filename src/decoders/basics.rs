@@ -44,11 +44,7 @@ pub fn decode_12be(buf: &[u8], width: usize, height: usize) -> Vec<u16> {
     buffer
 }
 
-pub fn decode_12be_unpacked(
-    buf: &[u8],
-    width: usize,
-    height: usize,
-) -> Vec<u16> {
+pub fn decode_12be_unpacked(buf: &[u8], width: usize, height: usize) -> Vec<u16> {
     let mut buffer: Vec<u16> = vec![0; width * height];
     let mut pos: usize = 0;
 

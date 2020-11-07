@@ -39,23 +39,16 @@ impl<'a> TiffIFD<'a> {
             let entry_offset: usize = offset + 2 + (i as usize) * 12;
             let entry = TiffEntry::new(buf, entry_offset);
 
-            if entry.tag == t(Tag::SUBIFDS)
-                || entry.tag == t(Tag::EXIFIFDPOINTER)
-            {
-                if depth < 10 {
-                    // Avoid infinite looping IFDs
-                    for i in 0..entry.count {
-                        subifds.push(TiffIFD::new(
-                            buf,
-                            entry.get_u32(i) as usize,
-                            depth + 1,
-                        ));
-                    }
-                }
-            } else {
-                entries.insert(entry.tag, entry);
-            }
+      if entry.tag == t(Tag::SUBIFDS) || entry.tag == t(Tag::EXIFIFDPOINTER) {
+        if depth < 10 { // Avoid infinite looping IFDs
+          for i in 0..entry.count {
+            subifds.push(TiffIFD::new(buf, entry.get_u32(i) as usize, depth+1));
+          }
         }
+      } else {
+        entries.insert(entry.tag, entry);
+      }
+    }
 
         TiffIFD {
             entries: entries,
@@ -71,7 +64,7 @@ impl<'a> TiffIFD<'a> {
             for ifd in &self.subifds {
                 match ifd.find_entry(tag) {
                     Some(x) => return Some(x),
-                    None => {}
+                    None => {},
                 }
             }
             None
