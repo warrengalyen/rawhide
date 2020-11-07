@@ -41,7 +41,7 @@ pub struct RawHide {
 }
 
 impl RawHide {
-  pub fn new(path: &str) -> RawHide {
+  pub fn new() -> RawHide {
     let mut map = HashMap::new();
 
     let mut parser = toml::Parser::new(&CAMERAS_TOML);

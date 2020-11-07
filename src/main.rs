@@ -35,7 +35,7 @@ fn main() {
   }
   println!("Total file is {} bytes in length", buffer.len());
 
-  let rawhide = decoders::RawHide::new("./data/cameras/");
+  let rawhide = decoders::RawHide::new();
   let decoder = match rawhide.get_decoder(&buffer) {
     Ok(val) => val,
     Err(e) => {error(&e);unreachable!()},
