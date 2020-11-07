@@ -1,8 +1,4 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::Read;
-extern crate glob;
-use self::glob::glob;
 
 extern crate toml;
 mod basics;
@@ -103,7 +99,7 @@ impl RawHide {
         match LEu16(buffer, 0) {
           x => {return Err(format!("Couldn't find decoder for marker 0x{:x}", x).to_string())},
         }
-        
+
         Err("Couldn't find a decoder!".to_string())
     }
 
