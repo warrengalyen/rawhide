@@ -54,6 +54,7 @@ fn main() {
   println!("black levels are {:?}", image.blacklevels);
   println!("white levels are {:?}", image.whitelevels);
   println!("color matrix is {:?}", image.color_matrix);
+  println!("dcraw filters {:#x}", image.dcraw_filters);
 
   // Write out the image as a grayscale PPM in an extremely inefficient way
   let mut f = File::create(format!("{}.ppm",file)).unwrap();
@@ -63,7 +64,7 @@ fn main() {
     let from: usize = (row as usize) * (image.width as usize);
     let to: usize = ((row+1) as usize) * (image.width as usize);
     let imgline = &image.data[from .. to];
-    
+
     for pixel in imgline {
       // Do an extremely crude "demosaic" by setting R=G=B
       let bytes = [(pixel>>4) as u8, (pixel&0x0f) as u8, (pixel>>4) as u8, (pixel&0x0f) as u8, (pixel>>4) as u8, (pixel&0x0f) as u8];
