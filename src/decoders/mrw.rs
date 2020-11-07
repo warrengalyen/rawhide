@@ -14,7 +14,7 @@ pub struct MrwDecoder<'a> {
   raw_height: u16,
   packed: bool,
   wb_vals: [u16;4],
-  tiff: TiffIFD,
+  tiff: TiffIFD<'a>,
 }
 
 impl<'a> MrwDecoder<'a> {
@@ -60,7 +60,7 @@ impl<'a> MrwDecoder<'a> {
       raw_height: raw_height,
       packed: packed,
       wb_vals: wb_vals,
-      tiff: TiffIFD::new(&buf[tiffpos + 8 .. buf.len()], 0, 0),
+      tiff: TiffIFD::new(&buf[tiffpos .. buf.len()], 8, 0),
     }
   }
 }
