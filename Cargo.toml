@@ -1,0 +1,7 @@
+[package]
+name = "rawhide"
+version = "0.1.0"
+authors = ["Warren Galyen"]
+
+[dependencies]
+byteorder = "1.3.4"
