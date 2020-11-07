@@ -25,11 +25,10 @@ fn main() {
 
   println!("Total file is {} bytes in length", buffer.len());
 
-  let rawhide = decoders::RawHide::new();
-  println!("Cameras is {:?}", rawhide.cameras);
+  let rawhide = decoders::RawHide::new("./data/cameras/");
 
   let decoder = rawhide.get_decoder(&buffer).unwrap();
-  let camera = decoder.identify();
+  let camera = decoder.identify().unwrap();
   println!("Found camera \"{}\" model \"{}\"", camera.make, camera.model);
 
   let image = decoder.image();
