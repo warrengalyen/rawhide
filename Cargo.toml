@@ -2,6 +2,12 @@
 name = "rawhide"
 version = "0.1.0"
 authors = ["Warren Galyen"]
+description = "A library to decode camera raw formats"
+#documentation = "..."
+#homepage = "..."
+repository = "https://github.com/warrengalyen/rawhide"
+license = "LGPL-2.1"
+
 build = "data/cameras/join.rs"
 
 [dependencies]
