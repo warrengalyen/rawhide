@@ -1,6 +1,6 @@
 # RawHide
 
-This is a rust library to decode image data and some metadata from digital camera images. Given an image in a supported format you will be able to retrieve everthing nee4d to process the image:
+This is a rust library to decode image data and some metadata from digital camera images. Given an image in a supported format you will be able to retrieve everthing needed to process the image:
 
   * Identification of the camera that produced the image
   * The raw pixels themselves, exactly as encoded by the camera
