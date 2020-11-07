@@ -1,10 +1,8 @@
 use std::env;
 use std::fs::File;
 use std::io::Read;
-use std::mem;
 
 mod decoders;
-use decoders::Decoder;
 
 fn usage() {
   println!("rawhide <file>");
@@ -15,7 +13,7 @@ fn main() {
 
   if args.len() != 2 {
     usage();
-
+    
     std::process::exit(2);
   }
 

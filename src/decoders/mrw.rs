@@ -12,7 +12,7 @@ pub struct MrwDecoder<'a> {
 
 impl<'a> MrwDecoder<'a> {
   pub fn new(buf: &[u8]) -> MrwDecoder {
-    let off = BEu32(buff, 4) + 8;
+    let off = BEu32(buf, 4) + 8;
 
     MrwDecoder { 
       buffer: buf,
