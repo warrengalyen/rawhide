@@ -1,6 +1,7 @@
 use std::env;
 use std::fs::File;
 use std::io::Read;
+extern crate toml;
 
 mod decoders;
 
@@ -24,10 +25,13 @@ fn main() {
 
   println!("Total file is {} bytes in length", buffer.len());
 
-  let decoder = decoders::get_decoder(&buffer).unwrap();
+  let rawhide = decoders::RawHide::new();
+  println!("Cameras is {:?}", rawhide.cameras);
+
+  let decoder = rawhide.get_decoder(&buffer).unwrap();
   let camera = decoder.identify();
   println!("Found camera \"{}\" model \"{}\"", camera.make, camera.model);
-  
+
   let image = decoder.image();
   println!("Image size is {}x{}", image.width, image.height);
   println!("WB coeffs are {},{},{},{}", image.wb_coeffs[0],

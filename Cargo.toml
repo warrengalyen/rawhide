@@ -5,3 +5,4 @@ authors = ["Warren Galyen"]
 
 [dependencies]
 itertools = "0.9.0"
+toml = "0.2.0"
