@@ -40,10 +40,10 @@ impl<'a> TiffIFD<'a> {
       let entry = TiffEntry::new(buf, entry_offset);
 
       if entry.tag == t(Tag::SUBIFDS) || entry.tag == t(Tag::EXIFIFDPOINTER) {
-        if depth < 10 {  // Avoid infinite looping IFDs
-            for i in 0..entry.count {
-                subifds.push(TiffIFD::new(buf, entry.get_u32(i) as usize, depth + 1));
-            }
+        if depth < 10 { // Avoid infinite looping IFDs
+          for i in 0..entry.count {
+            subifds.push(TiffIFD::new(buf, entry.get_u32(i) as usize, depth+1));
+          }
         }
       } else {
         entries.insert(entry.tag, entry);
@@ -57,18 +57,18 @@ impl<'a> TiffIFD<'a> {
   }
 
   pub fn find_entry(&self, tag: Tag) -> Option<&TiffEntry> {
-      let utag: u16 = tag as u16;
-      if self.entries.contains_key(&utag) {
-          self.entries.get(&utag)
-      } else {
-          for ifd in &self.subifds {
-              match ifd.find_entry(tag) {
-                  Some(x) => return Some(x),
-                  None => {},
-              }
-          }
-          None
+    let utag: u16 = tag as u16;
+    if self.entries.contains_key(&utag) {
+      self.entries.get(&utag)
+    } else {
+      for ifd in &self.subifds {
+        match ifd.find_entry(tag) {
+          Some(x) => return Some(x),
+          None => {},
+        }
       }
+      None
+    }
   }
 }
 
@@ -99,13 +99,13 @@ impl<'a> TiffEntry<'a> {
   }
 
   pub fn get_u32(&self, idx: u32) -> u32 {
-      BEu32(self.data, (idx * 4) as usize)
+    BEu32(self.data, (idx*4) as usize)
   }
 
   pub fn get_str(&self) -> &str {
     match str::from_utf8(&self.data[0..self.data.len()-1]) {
-        Result::Ok(val) => val.trim(),
-        Result::Err(err) => panic!(err),
-      }
+      Result::Ok(val) => val.trim(),
+      Result::Err(err) => panic!(err),
+    }
   }
 }
