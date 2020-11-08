@@ -3,6 +3,7 @@ use std::collections::HashMap;
 extern crate toml;
 mod basics;
 mod mrw;
+mod arw;
 mod tiff;
 use self::basics::*;
 use self::tiff::*;
@@ -119,12 +120,11 @@ impl RawHide {
         };
 
         let tiff = TiffIFD::new_root(buffer, 4, 0, endian);
-        let make = try!(tiff
-            .find_entry(Tag::MAKE)
-            .ok_or("Couldn't find Make".to_string()))
-        .get_str();
-
-        Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string())
+        // FIXME: Cloning tiff is ugly as hell, need to fix the borrowing in this case
+        match try!(tiff.clone().find_entry(Tag::MAKE).ok_or("Couldn't find Make".to_string())).get_str() {
+          "SONY" => Ok(Box::new(arw::ArwDecoder::new(tiff, &self)) as Box<Decoder>),
+          make => Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string()),
+      }
     }
 
     pub fn check_supported<'a>(&'a self, make: &'a str, model: &'a str) -> Result<&Camera, String> {
