@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use decoders::basics::*;
+use std::collections::HashMap;
 use std::str;
 
 #[derive(Debug, Copy, Clone)]
@@ -28,11 +28,34 @@ pub struct TiffEntry<'a> {
 pub struct TiffIFD<'a> {
     entries: HashMap<u16, TiffEntry<'a>>,
     subifds: Vec<TiffIFD<'a>>,
+    nextifd: usize,
     endian: Endian,
 }
 
 impl<'a> TiffIFD<'a> {
-    pub fn new(buf: &'a[u8], offset: usize, depth: u32, e: Endian) -> TiffIFD<'a> {
+    pub fn new_root(buf: &'a [u8], offset: usize, depth: u32, e: Endian) -> TiffIFD<'a> {
+        let mut subifds = Vec::new();
+        let mut nextifd = e.ru32(buf, offset) as usize;
+
+        for _ in 0..100 {
+            // Never read more than 100 IFDs
+            let ifd = TiffIFD::new(buf, nextifd, depth, e);
+            nextifd = ifd.nextifd;
+            subifds.push(ifd);
+            if nextifd == 0 {
+                break;
+            }
+        }
+
+        TiffIFD {
+            entries: HashMap::new(),
+            subifds: subifds,
+            nextifd: 0,
+            endian: e,
+        }
+    }
+
+    pub fn new(buf: &'a [u8], offset: usize, depth: u32, e: Endian) -> TiffIFD<'a> {
         let mut entries = HashMap::new();
         let mut subifds = Vec::new();
 
@@ -41,20 +64,22 @@ impl<'a> TiffIFD<'a> {
             let entry_offset: usize = offset + 2 + (i as usize) * 12;
             let entry = TiffEntry::new(buf, entry_offset, e);
 
-      if entry.tag == t(Tag::SUBIFDS) || entry.tag == t(Tag::EXIFIFDPOINTER) {
-        if depth < 10 { // Avoid infinite looping IFDs
-          for i in 0..entry.count {
-            subifds.push(TiffIFD::new(buf, entry.get_u32(i) as usize, depth+1, e));
-          }
+            if entry.tag == t(Tag::SUBIFDS) || entry.tag == t(Tag::EXIFIFDPOINTER) {
+                if depth < 10 {
+                    // Avoid infinite looping IFDs
+                    for i in 0..entry.count {
+                        subifds.push(TiffIFD::new(buf, entry.get_u32(i) as usize, depth + 1, e));
+                    }
+                }
+            } else {
+                entries.insert(entry.tag, entry);
+            }
         }
-      } else {
-        entries.insert(entry.tag, entry);
-      }
-    }
 
         TiffIFD {
             entries: entries,
             subifds: subifds,
+            nextifd: e.ru32(buf, offset + (2 + num * 12) as usize) as usize,
             endian: e,
         }
     }
@@ -67,7 +92,7 @@ impl<'a> TiffIFD<'a> {
             for ifd in &self.subifds {
                 match ifd.find_entry(tag) {
                     Some(x) => return Some(x),
-                    None => {},
+                    None => {}
                 }
             }
             None
@@ -76,10 +101,10 @@ impl<'a> TiffIFD<'a> {
 }
 
 impl<'a> TiffEntry<'a> {
-    pub fn new(buf: &'a[u8], offset: usize, e: Endian) -> TiffEntry<'a> {
+    pub fn new(buf: &'a [u8], offset: usize, e: Endian) -> TiffEntry<'a> {
         let tag = e.ru16(buf, offset);
-        let mut typ = e.ru16(buf, offset+2);
-        let count = e.ru32(buf, offset+4);
+        let mut typ = e.ru16(buf, offset + 2);
+        let count = e.ru32(buf, offset + 4);
 
         // If we don't know the type assume byte data
         if typ == 0 || typ > 13 {
@@ -103,7 +128,7 @@ impl<'a> TiffEntry<'a> {
     }
 
     pub fn get_u32(&self, idx: u32) -> u32 {
-        self.endian.ru32(self.data, (idx*4) as usize)
+        self.endian.ru32(self.data, (idx * 4) as usize)
     }
 
     pub fn get_str(&self) -> &str {

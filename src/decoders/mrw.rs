@@ -1,6 +1,6 @@
-use decoders::*;
-use decoders::tiff::*;
 use decoders::basics::*;
+use decoders::tiff::*;
+use decoders::*;
 use std::f32;
 
 pub fn is_mrw(buf: &[u8]) -> bool {
@@ -27,32 +27,35 @@ impl<'a> MrwDecoder<'a> {
         let mut wb_vals: [u16; 4] = [0; 4];
         let mut tiffpos: usize = 0;
 
-    let mut currpos: usize = 8;
-    // At most we read 20 bytes from currpos so check we don't step outside that
-    while currpos+20 < data_offset {
-      let tag: u32 = BEu32(buf,currpos);
-      let len: u32 = BEu32(buf,currpos+4);
-      
-      match tag {
-        0x505244 => { // PRD
-          raw_height = BEu16(buf,currpos+16);
-          raw_width = BEu16(buf,currpos+18);
-          packed = buf[currpos+24] == 12;
+        let mut currpos: usize = 8;
+        // At most we read 20 bytes from currpos so check we don't step outside that
+        while currpos + 20 < data_offset {
+            let tag: u32 = BEu32(buf, currpos);
+            let len: u32 = BEu32(buf, currpos + 4);
+
+            match tag {
+                0x505244 => {
+                    // PRD
+                    raw_height = BEu16(buf, currpos + 16);
+                    raw_width = BEu16(buf, currpos + 18);
+                    packed = buf[currpos + 24] == 12;
+                }
+                0x574247 => {
+                    // WBG
+                    for i in 0..4 {
+                        wb_vals[i] = BEu16(buf, currpos + 12 + i * 2);
+                    }
+                }
+                0x545457 => {
+                    // TTW
+                    // Base value for offsets needs to be at the beginning of the
+                    // TIFF block, not the file
+                    tiffpos = currpos + 8;
+                }
+                _ => {}
+            }
+            currpos += (len + 8) as usize;
         }
-        0x574247 => { // WBG
-          for i in 0..4 {
-            wb_vals[i] = BEu16(buf, currpos+12+i*2);
-          }
-        }
-        0x545457 => { // TTW
-          // Base value for offsets needs to be at the beginning of the 
-          // TIFF block, not the file
-          tiffpos = currpos+8;
-        }
-        _ => {}
-      }
-      currpos += (len+8) as usize;
-    }
 
         MrwDecoder {
             buffer: buf,
@@ -61,7 +64,7 @@ impl<'a> MrwDecoder<'a> {
             raw_height: raw_height,
             packed: packed,
             wb_vals: wb_vals,
-            tiff: TiffIFD::new(&buf[tiffpos .. buf.len()], 8, 0, BIG_ENDIAN),
+            tiff: TiffIFD::new(&buf[tiffpos..buf.len()], 8, 0, BIG_ENDIAN),
             rawhide: rawhide,
         }
     }
@@ -112,10 +115,10 @@ impl<'a> Decoder for MrwDecoder<'a> {
             ]
         };
 
-    let camera = match self.identify() {
-      Ok(val) => val,
-      Err(e) => {return Err(e)},
-    };
+        let camera = match self.identify() {
+            Ok(val) => val,
+            Err(e) => return Err(e),
+        };
 
         Ok(Image {
             width: self.raw_width as u32,

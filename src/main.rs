@@ -1,6 +1,6 @@
 use std::env;
-use std::fs::File;
 use std::error::Error;
+use std::fs::File;
 use std::io::prelude::*;
 extern crate toml;
 
