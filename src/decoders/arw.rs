@@ -1,38 +1,30 @@
-use decoders::basics::*;
-use decoders::tiff::*;
 use decoders::*;
+use decoders::tiff::*;
+use decoders::basics::*;
 
 #[derive(Debug, Clone)]
 pub struct ArwDecoder<'a> {
-    rawhide: &'a RawHide,
-    tiff: TiffIFD<'a>,
+  rawhide: &'a RawHide,
+  tiff: TiffIFD<'a>,
 }
 
 impl<'a> ArwDecoder<'a> {
-    pub fn new(tiff: TiffIFD<'a>, rawhide: &'a RawHide) -> ArwDecoder<'a> {
-        ArwDecoder {
-            tiff: tiff,
-            rawhide: rawhide,
-        }
+  pub fn new(tiff: TiffIFD<'a>, rawhide: &'a RawHide) -> ArwDecoder<'a> {
+    ArwDecoder {
+      tiff: tiff,
+      rawhide: rawhide,
     }
+  }
 }
 
 impl<'a> Decoder for ArwDecoder<'a> {
-    fn identify(&self) -> Result<&Camera, String> {
-        let make = try!(self
-            .tiff
-            .find_entry(Tag::MAKE)
-            .ok_or("ARW: Couldn't find Make".to_string()))
-        .get_str();
-        let model = try!(self
-            .tiff
-            .find_entry(Tag::MODEL)
-            .ok_or("ARW: Couldn't find Model".to_string()))
-        .get_str();
-        self.rawhide.check_supported(make, model)
-    }
+  fn identify(&self) -> Result<&Camera, String> {
+    let make = fetch_tag!(self.tiff, Tag::MAKE, "ARW: Couldn't find Make").get_str();
+    let model = fetch_tag!(self.tiff, Tag::MODEL, "ARW: Couldn't find Model").get_str();
+    self.rawhide.check_supported(make, model)
+  }
 
-    fn image(&self) -> Result<Image, String> {
-        Err("ARW: Decoding not implemented yet!".to_string())
-    }
+  fn image(&self) -> Result<Image,String> {
+    Err("ARW: Decoding not implemented yet!".to_string())
+  }
 }
