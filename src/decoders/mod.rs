@@ -2,16 +2,14 @@ use std::collections::HashMap;
 use std::io::Read;
 
 macro_rules! fetch_tag {
-  ($tiff:expr, $tag:expr, $message:expr) => {
-    try!($tiff.find_entry($tag).ok_or($message.to_string()));
-  };
+  ($tiff:expr, $tag:expr, $message:expr) => (try!($tiff.find_entry($tag).ok_or($message.to_string())););
 }
 
 extern crate toml;
-mod arw;
 mod basics;
-mod mrw;
 mod tiff;
+mod mrw;
+mod arw;
 use self::basics::*;
 use self::tiff::*;
 
@@ -44,13 +42,13 @@ impl Buffer {
 pub struct Image {
   pub width: u32,
   pub height: u32,
-  pub wb_coeffs: [f32; 4],
+  pub wb_coeffs: [f32;4],
   pub data: Box<[u16]>,
-  pub whitelevels: [i64; 4],
-  pub blacklevels: [i64; 4],
-  pub color_matrix: [i64; 12],
+  pub whitelevels: [i64;4],
+  pub blacklevels: [i64;4],
+  pub color_matrix: [i64;12],
   pub dcraw_filters: u32,
-  pub crops: [i64; 4],
+  pub crops: [i64;4],
 }
 
 #[derive(Debug, Clone)]
@@ -59,11 +57,12 @@ pub struct Camera {
   pub model: String,
   pub canonical_make: String,
   pub canonical_model: String,
-  whitelevels: [i64; 4],
-  blacklevels: [i64; 4],
-  color_matrix: [i64; 12],
+  whitelevels: [i64;4],
+  blacklevels: [i64;4],
+  color_matrix: [i64;12],
   dcraw_filters: u32,
-  crops: [i64; 4],
+  crops: [i64;4],
+  bps: u32,
 }
 
 pub fn ok_image(camera: &Camera, width: u32, height: u32, wb_coeffs: [f32;4], image: Vec<u16>) -> Result<Image,String> {
@@ -82,7 +81,7 @@ pub fn ok_image(camera: &Camera, width: u32, height: u32, wb_coeffs: [f32;4], im
 
 #[derive(Debug, Clone)]
 pub struct RawHide {
-  pub cameras: HashMap<(String, String), Camera>,
+  pub cameras: HashMap<(String,String),Camera>,
 }
 
 impl RawHide {
@@ -95,59 +94,52 @@ impl RawHide {
       None => panic!(format!("Error parsing all.toml: {:?}", parser.errors)),
     };
     let cameras = toml.get("cameras").unwrap().as_table().unwrap();
-    for (_, c) in cameras {
+    for (_,c) in cameras {
       let ct = c.as_table().unwrap();
       let make = ct.get("make").unwrap().as_str().unwrap().to_string();
       let model = ct.get("model").unwrap().as_str().unwrap().to_string();
-      let canonical_make = ct
-        .get("canonical_make")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_string();
-      let canonical_model = ct
-        .get("canonical_model")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_string();
+      let canonical_make = ct.get("canonical_make").unwrap().as_str().unwrap().to_string();
+      let canonical_model = ct.get("canonical_model").unwrap().as_str().unwrap().to_string();
       let white = ct.get("whitepoint").unwrap().as_integer().unwrap();
       let black = ct.get("blackpoint").unwrap().as_integer().unwrap();
       let matrix = ct.get("color_matrix").unwrap().as_slice().unwrap();
-      let mut cmatrix: [i64; 12] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      let mut cmatrix: [i64;12] = [0,0,0,0,0,0,0,0,0,0,0,0];
       for (i, val) in matrix.into_iter().enumerate() {
         cmatrix[i] = val.as_integer().unwrap();
       }
       let crop_vals = ct.get("crops").unwrap().as_slice().unwrap();
-      let mut crops: [i64; 4] = [0, 0, 0, 0];
+      let mut crops: [i64;4] = [0,0,0,0];
       for (i, val) in crop_vals.into_iter().enumerate() {
         crops[i] = val.as_integer().unwrap();
       }
-      let color_pattern = ct
-        .get("color_pattern")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_string();
-      let cam = Camera {
+      let color_pattern = ct.get("color_pattern").unwrap().as_str().unwrap().to_string();
+      let bps: u32 = match ct.get("bps") {
+        Some(x) => x.as_integer().unwrap() as u32,
+        None => 0,
+      };
+      let cam = Camera{
         make: make.clone(),
         model: model.clone(),
         canonical_make: canonical_make.clone(),
         canonical_model: canonical_model.clone(),
         whitelevels: [white, white, white, white],
         blacklevels: [black, black, black, black],
-        color_matrix: cmatrix,
+        color_matrix : cmatrix,
         dcraw_filters: RawHide::dcraw_filters(&color_pattern),
         crops: crops,
+        bps: bps,
       };
-      map.insert((make.clone(), model.clone()), cam);
+      map.insert((make.clone(),model.clone()), cam);
     }
 
-    RawHide { cameras: map }
+    RawHide{
+      cameras: map,
+    }
   }
 
   pub fn get_decoder<'b>(&'b self, buf: &'b Buffer) -> Result<Box<Decoder+'b>, String> {
     let buffer = &buf.buf;
+
     if mrw::is_mrw(buffer) {
       let dec = Box::new(mrw::MrwDecoder::new(buffer, &self));
       return Ok(dec as Box<Decoder>);
@@ -156,21 +148,15 @@ impl RawHide {
     let endian = match LEu16(&buffer, 0) {
       0x4949 => LITTLE_ENDIAN,
       0x4d4d => BIG_ENDIAN,
-      x => return Err(format!("Couldn't find decoder for marker 0x{:x}", x).to_string()),
+      x => {return Err(format!("Couldn't find decoder for marker 0x{:x}", x).to_string())},
     };
 
     macro_rules! use_decoder {
-      ($dec:ty, $buf:ident, $tiff:ident, $rawdec:ident) => {
-        Ok(Box::new(<$dec>::new($buf, $tiff, $rawdec)) as Box<Decoder>)
-      };
+        ($dec:ty, $buf:ident, $tiff:ident, $rawdec:ident) => (Ok(Box::new(<$dec>::new($buf, $tiff, $rawdec)) as Box<Decoder>));
     }
 
     let tiff = TiffIFD::new_root(buffer, 4, 0, endian);
-    let make: &str = &(try!(tiff
-      .find_entry(Tag::Make)
-      .ok_or("Couldn't find Make".to_string()))
-    .get_str()
-    .to_string());
+    let make: &str = &(try!(tiff.find_entry(Tag::Make).ok_or("Couldn't find Make".to_string())).get_str().to_string());
     match make {
       "SONY" => use_decoder!(arw::ArwDecoder, buffer, tiff, self),
       make => Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string()),
@@ -178,7 +164,7 @@ impl RawHide {
   }
 
   pub fn check_supported<'a>(&'a self, make: &'a str, model: &'a str) -> Result<&Camera, String> {
-    match self.cameras.get(&(make.to_string(), model.to_string())) {
+    match self.cameras.get(&(make.to_string(),model.to_string())) {
       Some(cam) => Ok(cam),
       None => Err(format!("Couldn't find camera \"{}\" \"{}\"", make, model)),
     }
