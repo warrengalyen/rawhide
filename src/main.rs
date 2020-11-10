@@ -24,16 +24,8 @@ fn main() {
     let file = &args[1];
     println!("Loading file \"{}\"", file);
 
-    let mut f = match File::open(file) {
-        Ok(val) => val,
-        Err(e) => {
-            error(e.description());
-            unreachable!()
-        }
-    };
-
     let rawhide = decoders::RawHide::new();
-    let image  = match rawhide.decode(&mut f)  {
+    let image  = match rawhide.decode_safe(file)  {
         Ok(val) => val,
         Err(e) => {
             error(&e);

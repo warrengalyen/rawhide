@@ -37,9 +37,8 @@ fn main() {
   let file = &args[1];
   println!("Loading file \"{}\"", file);
 
-  let mut f = File::open(file).unwrap();
   let rawhide = decoders::RawHide::new();
-  let image = rawhide.decode(&mut f).unwrap();
+  let image = rawhide.decode_safe(file).unwrap();
   println!("Found camera \"{}\" model \"{}\"", image.make, image.model);
   println!("Found canonical named camera \"{}\" model \"{}\"", image.canonical_make, image.canonical_model);
 
