@@ -32,13 +32,8 @@ fn main() {
         }
     };
 
-    let buffer = match decoders::Buffer::new(&mut f) {
-        Ok(val) => val,
-        Err(e) => {error(&e);unreachable!()},
-    };
-
     let rawhide = decoders::RawHide::new();
-    let decoder = match rawhide.get_decoder(&buffer) {
+    let image  = match rawhide.decode(&mut f)  {
         Ok(val) => val,
         Err(e) => {
             error(&e);
@@ -46,29 +41,8 @@ fn main() {
         }
     };
 
-    let camera = match decoder.identify() {
-        Ok(val) => val,
-        Err(e) => {
-            error(&e);
-            unreachable!()
-        }
-    };
-    println!(
-        "Found camera \"{}\" model \"{}\"",
-        camera.make, camera.model
-    );
-    println!(
-        "Found canonical named camera \"{}\" model \"{}\"",
-        camera.canonical_make, camera.canonical_model
-    );
-
-    let image = match decoder.image() {
-        Ok(val) => val,
-        Err(e) => {
-            error(&e);
-            unreachable!()
-        }
-    };
+    println!("Found camera \"{}\" model \"{}\"", image.make, image.model);
+    println!("Found canonical named camera \"{}\" model \"{}\"", image.canonical_make, image.canonical_model);
     println!("Image size is {}x{}", image.width, image.height);
     println!("WB coeffs are {:?}", image.wb_coeffs);
     println!("black levels are {:?}", image.blacklevels);
