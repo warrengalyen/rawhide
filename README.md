@@ -13,8 +13,10 @@ This is a rust library to decode image data and some metadata from digital camer
   Current State
   -------------
 
-The library is still in a very early stage with only the simple Minolta MRW format implemented. 
-
+The library is still in a very early stage with very few formats implemented:
+  * Minolta MRW
+  * Most of Sony ARW (all modern cameras including uncompressed files)
+  
 Usage
 -----
 
