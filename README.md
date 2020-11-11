@@ -24,6 +24,7 @@ Here's a simple sample program that uses this library:
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
+use std::io::BufWriter;
 
 extern crate rawhide;
 use rawhide::decoders;
@@ -50,8 +51,8 @@ fn main() {
   println!("dcraw filters is {:#x}", image.dcraw_filters);
   println!("crops are {:?}", image.crops);
 
-  // Write out the image as a grayscale PPM in an extremely inefficient way
-  let mut f = File::create(format!("{}.ppm",file)).unwrap();
+  // Write out the image as a grayscale PPM
+  let mut f = BufWriter::new(File::create(format!("{}.ppm",file)).unwrap());
   let preamble = format!("P6 {} {} {}\n", image.width, image.height, image.whitelevels[0]).into_bytes();
   f.write_all(&preamble).unwrap();
   for row in 0..image.height {
