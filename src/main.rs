@@ -5,8 +5,8 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 extern crate time;
 extern crate toml;
-
-mod decoders;
+extern crate rawhide;
+use rawhide::decoders;
 
 fn usage() {
     println!("rawhide <file>");
