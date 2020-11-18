@@ -1,8 +1,10 @@
 use decoders::basics::*;
 use std::collections::HashMap;
 use std::str;
+use num::FromPrimitive;
 
-#[derive(Debug, Copy, Clone)]
+enum_from_primitive! {
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Tag {
     ImageWidth     = 0x0100,
     ImageLength    = 0x0101,
@@ -21,6 +23,7 @@ pub enum Tag {
     SonyRGGB       = 0x7313,
     ExifIFDPointer = 0x8769,
     DNGPrivateArea = 0xC634,
+}
 }
 
 // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
@@ -76,6 +79,10 @@ impl<'a> TiffIFD<'a> {
         let num = e.ru16(buf, offset); // Directory entries in this IFD
         for i in 0..num {
             let entry_offset: usize = offset + 2 + (i as usize) * 12;
+            if Tag::from_u16(e.ru16(buf, entry_offset)).is_none() {
+                // Skip entries we don't know about to speedup decoding
+                continue;
+            }
             let entry = TiffEntry::new(buf, entry_offset, base_offset, e);
 
             if entry.tag == t(Tag::SubIFDs) || entry.tag == t(Tag::ExifIFDPointer) {
