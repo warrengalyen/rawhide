@@ -10,10 +10,6 @@ license = "LGPL-2.1"
 
 build = "data/cameras/join.rs"
 
-[[bin]]
-name = "benchmark"
-path = "src/bin/benchmark.rs"
-
 [dependencies]
 itertools = "0.9.0"
 toml = "0.2.0"
