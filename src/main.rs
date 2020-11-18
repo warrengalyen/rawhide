@@ -3,6 +3,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
+extern crate time;
 extern crate toml;
 
 mod decoders;
@@ -26,6 +27,7 @@ fn main() {
     println!("Loading file \"{}\"", file);
 
     let rawhide = decoders::RawHide::new();
+    let from_time = time::precise_time_ns();
     let image  = match rawhide.decode_safe(file)  {
         Ok(val) => val,
         Err(e) => {
@@ -33,6 +35,8 @@ fn main() {
             unreachable!()
         }
     };
+    let to_time = time::precise_time_ns();
+    println!("Decoded in {} ms", (to_time - from_time)/1000000);
 
     println!("Found camera \"{}\" model \"{}\"", image.make, image.model);
     println!("Found canonical named camera \"{}\" model \"{}\"", image.canonical_make, image.canonical_model);
