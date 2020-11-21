@@ -15,7 +15,7 @@ This is a rust library to decode image data and some metadata from digital camer
 
 The library is still in a very early stage with only a few formats implemented:
   * Minolta MRW
-  * Sony ARW
+  * Sony ARW, SRF and SR2
   
 Usage
 -----
