@@ -7,6 +7,7 @@ extern crate time;
 extern crate toml;
 extern crate rawhide;
 use rawhide::decoders;
+use rawhide::imageops;
 
 fn usage() {
     println!("rawhide <file> [outfile]");
@@ -62,6 +63,8 @@ fn main() {
     let count: u64 = (image.width as u64) * (image.height as u64);
     println!("Image avg: {}", sum / count);
 
+    let decoded = imageops::simple_decode(&image);
+
     let uf = match File::create(outfile) {
         Ok(val) => val,
         Err(e) => {
@@ -70,27 +73,15 @@ fn main() {
         }
     };
     let mut f = BufWriter::new(uf);
-    let preamble = format!("P6 {} {} {}\n", image.width, image.height, image.whitelevels[0]).into_bytes();
+    let preamble = format!("P6 {} {} {}\n", image.width, image.height, 65535).into_bytes();
     if let Err(err) = f.write_all(&preamble) {
         error(err.description());
     }
-    for row in 0..image.height {
-        let from: usize = (row as usize) * (image.width as usize);
-        let to: usize = ((row + 1) as usize) * (image.width as usize);
-        let imgline = &image.data[from..to];
-
-        for pixel in imgline {
-            let bytes = [
-                (pixel >> 4) as u8,
-                (pixel & 0x0f) as u8,
-                (pixel >> 4) as u8,
-                (pixel & 0x0f) as u8,
-                (pixel >> 4) as u8,
-                (pixel & 0x0f) as u8,
-            ];
-            if let Err(err) = f.write_all(&bytes) {
-                error(err.description());
-            }
+    for pix in decoded {
+        let pixel = ((pix.max(0.0)*65535.0).min(65535.0)) as u16;
+        let bytes = [(pixel>>4) as u8, (pixel&0x0f) as u8];
+        if let Err(err) = f.write_all(&bytes) {
+          error(err.description());
         }
     }
 }
