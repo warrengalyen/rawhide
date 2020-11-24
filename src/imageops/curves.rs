@@ -4,12 +4,16 @@ use std::cmp;
 pub fn base(_: &Image, inb: &[f32]) -> Vec<f32> {
   let mut out: Vec<f32> = vec![0.0; inb.len() as usize];  
 
-  let xs = [0.0, 0.050, 0.100, 0.450, 0.850, 1.0];
-  let ys = [0.0, 0.055, 0.220, 0.770, 0.985, 1.0];
+  let xs = [0.0, 0.30, 0.5, 0.70, 1.0];
+  let ys = [0.0, 0.25, 0.5, 0.75, 1.0];
   let func = SplineFunc::new(&xs, &ys);
 
   for (i,val) in inb.iter().enumerate() {
-    out[i] = func.interpolate(*val);
+    out[i] = if i % 3 == 0 {
+      func.interpolate(*val)
+    } else {
+      *val
+    };
   }
 
   out
@@ -41,7 +45,7 @@ impl<'a> SplineFunc<'a> {
       dys.push(dy);
       slopes.push(dy/dx);
     }
-
+		
 	  // Get degree-1 coefficients
     let mut c1s = vec![slopes[0]];
     for i in 0..(dxs.len()-1) {
@@ -57,7 +61,7 @@ impl<'a> SplineFunc<'a> {
       }
     }
     c1s.push(slopes[slopes.len()-1]);
-
+	
 	  // Get degree-2 and degree-3 coefficients
     let mut c2s = Vec::new();
     let mut c3s = Vec::new();
@@ -69,7 +73,7 @@ impl<'a> SplineFunc<'a> {
       c2s.push((slope-c1-common)*invdx);
       c3s.push(common*invdx*invdx);
     }
-
+	
     SplineFunc {
       xs: xs,
       ys: ys,
@@ -85,7 +89,7 @@ impl<'a> SplineFunc<'a> {
     if val >= end {
       return self.ys[self.ys.len()-1];
     }
-
+		
 		// Search for the interval x is in, returning the corresponding y if x is one of the original xs
     let mut low: isize = 0;
     let mut mid: isize;
@@ -99,7 +103,7 @@ impl<'a> SplineFunc<'a> {
       else { return self.ys[mid as usize] }
 		}
     let i = cmp::max(0, high) as usize;
-
+		
 		// Interpolate
     let diff = val - self.xs[i];
 
