@@ -2,12 +2,20 @@ pub mod ingest;
 pub mod demosaic;
 pub mod level;
 pub mod colorspaces;
-pub mod gamma;
 pub mod curves;
+pub mod gamma;
 
 use decoders::Image;
 
 extern crate time;
+
+#[derive(Debug, Clone)]
+pub struct OpBuffer {
+  pub width: usize,
+  pub height: usize,
+  pub colors: u8,
+  pub data: Vec<f32>,
+}
 
 #[inline] pub fn fcol (img: &Image, row: usize, col: usize) -> usize {
 //  let filter: [usize; 256] = [
@@ -46,18 +54,18 @@ fn do_timing<O, F: FnMut() -> O>(name: &str, mut closure: F) -> O {
   ret
 }
 
-pub fn simple_decode (img: &Image) -> Vec<f32> {
-   // Start with a 1 channel f32 (pre-demosaic)
-   let channel1 = do_timing("ingest", ||ingest::float(img));
-   // Demosaic into 4 channel f32 (RGB or RGBE)
-   let mut channel4 = do_timing("demosaic", ||demosaic::ppg(img, &channel1));
+pub fn simple_decode (img: &Image) -> OpBuffer {
+  // Start with a 1 channel f32 (pre-demosaic)
+  let channel1 = do_timing("ingest", ||ingest::float(img));
+  // Demosaic into 4 channel f32 (RGB or RGBE)
+  let mut channel4 = do_timing("demosaic", ||demosaic::ppg(img, &channel1));
 
-   do_timing("level_and_balance", || { level::level_and_balance(img, &mut channel4) });
-   // From now on we are in 3 channel f32 (RGB or Lab)
-   let mut channel3 = do_timing("camera_to_lab", ||colorspaces::camera_to_lab(img, &channel4));
-   do_timing("base_curve", ||curves::base(img, &mut channel3));
-   do_timing("lab_to_rec709", ||colorspaces::lab_to_rec709(img, &mut channel3));
-   do_timing("gamma", ||gamma::gamma(img, &mut channel3));
+  do_timing("level_and_balance", || { level::level_and_balance(img, &mut channel4) });
+  // From now on we are in 3 channel f32 (RGB or Lab)
+  let mut channel3 = do_timing("camera_to_lab", ||colorspaces::camera_to_lab(img, &channel4));
+  do_timing("base_curve", ||curves::base(img, &mut channel3));
+  do_timing("lab_to_rec709", ||colorspaces::lab_to_rec709(img, &mut channel3));
+  do_timing("gamma", ||gamma::gamma(img, &mut channel3));
 
   channel3
 }
