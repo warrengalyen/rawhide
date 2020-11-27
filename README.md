@@ -26,6 +26,7 @@ Additionally it includes a simple raw processing pipeline that does the followin
 The library is still in a very early stage with only a few formats implemented:
   * Minolta MRW
   * Sony ARW, SRF and SR2
+  * Mamiya MEF
   
 Usage
 -----
