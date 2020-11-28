@@ -13,10 +13,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fc10e8cc6b2580fda3f36eb6dc5316657f812a3df879a44a66fc9f0fdbc4855"
 
 [[package]]
-name = "crossbeam"
-version = "0.2.12"
+name = "deque"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bd66663db5a988098a89599d4857919b3acf7f61402e61365acfd3919857b9be"
+checksum = "a694dae478589798d752c7125542f8a5ae8b6e59476172baf2eed67357bdfa27"
 
 [[package]]
 name = "enum_primitive"
@@ -82,7 +82,7 @@ checksum = "e63899ad0da84ce718c14936262a41cee2c79c981fc0a0e7c7beb47d5a07e8c1"
 dependencies = [
  "num-integer",
  "num-traits 0.2.14",
- "rand",
+ "rand 0.4.6",
  "rustc-serialize",
 ]
 
@@ -159,6 +159,16 @@ dependencies = [
 
 [[package]]
 name = "rand"
+version = "0.3.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64ac302d8f83c0c1974bf758f6b041c6c8ada916fbb44a609158ca8b064cc76c"
+dependencies = [
+ "libc",
+ "rand 0.4.6",
+]
+
+[[package]]
+name = "rand"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "552840b97013b1a26992c11eac34bdd778e464601a4c2054b5f0bff7c6761293"
@@ -190,14 +200,25 @@ name = "rawhide"
 version = "0.13.1"
 dependencies = [
  "byteorder",
- "crossbeam",
  "enum_primitive",
  "glob",
  "lazy_static",
  "num",
- "num_cpus",
+ "rayon",
  "time",
  "toml",
+]
+
+[[package]]
+name = "rayon"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b6a6e05e0e6b703e9f2ad266eb63f3712e693a17a2702b95a23de14ce8defa9"
+dependencies = [
+ "deque",
+ "libc",
+ "num_cpus",
+ "rand 0.3.23",
 ]
 
 [[package]]
