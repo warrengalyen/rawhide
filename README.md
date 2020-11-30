@@ -28,6 +28,7 @@ The library is still in a very early stage with only a few formats implemented:
   * Sony ARW, SRF and SR2
   * Mamiya MEF
   * Olympus ORF
+  * Samsung SRW
   
 Usage
 -----
