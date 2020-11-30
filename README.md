@@ -29,6 +29,7 @@ The library is still in a very early stage with only a few formats implemented:
   * Mamiya MEF
   * Olympus ORF
   * Samsung SRW
+  * Epson ERF
   
 Usage
 -----
