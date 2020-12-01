@@ -28,7 +28,7 @@ impl<'a> Decoder for KdcDecoder<'a> {
   }
 
   fn image(&self) -> Result<Image,String> {
-    let camera = try!(self.identify());
+    let camera = (self.identify())?;
     let width = fetch_tag!(self.tiff, Tag::KdcWidth, "KDC: Couldn't find width").get_u32(0)+80;
     let height = fetch_tag!(self.tiff, Tag::KdcLength, "KDC: Couldn't find height").get_u32(0)+70;
     let offset = fetch_tag!(self.tiff, Tag::KdcOffset, "KDC: Couldn't find offset");
@@ -44,19 +44,30 @@ impl<'a> Decoder for KdcDecoder<'a> {
 
     let src = &self.buffer[off..];
     let image = decode_12be(src, width as usize, height as usize);
-    ok_image(camera, width, height, try!(self.get_wb()), image)
+    ok_image(camera, width, height, (self.get_wb())?, image)
   }
 }
 
 impl<'a> KdcDecoder<'a> {
   fn get_wb(&self) -> Result<[f32;4], String> {
-    let levels = fetch_tag!(self.tiff, Tag::KodakWB, "KDC: No levels");
-    if levels.count() != 734 && levels.count() != 1502 {
-      Err("KDC: Levels count is off".to_string())
-    } else {
-      let r = BEu16(levels.get_data(), 148) as f32;
-      let b = BEu16(levels.get_data(), 150) as f32;
-      Ok([r / 256.0, 1.0, b / 256.0, NAN])
+    match self.tiff.find_entry(Tag::KdcWB) {
+        Some(levels) => {
+          if levels.count() != 3 {
+            Err("KDC: Levels count is off".to_string())
+          } else {
+            Ok([levels.get_f32(0), levels.get_f32(1), levels.get_f32(2), NAN])
+          }
+        },
+        None => {
+          let levels = fetch_tag!(self.tiff, Tag::KodakWB, "KDC: No levels");
+          if levels.count() != 734 && levels.count() != 1502 {
+            Err("KDC: Levels count is off".to_string())
+          } else {
+            let r = BEu16(levels.get_data(), 148) as f32;
+            let b = BEu16(levels.get_data(), 150) as f32;
+            Ok([r / 256.0, 1.0, b / 256.0, NAN])
+          }
+        },
     }
   }
 }

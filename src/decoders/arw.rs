@@ -30,7 +30,7 @@ impl<'a> Decoder for ArwDecoder<'a> {
   }
 
   fn image(&self) -> Result<Image,String> {
-    let camera = try!(self.identify());
+    let camera = (self.identify())?;
     let data = self.tiff.find_ifds_with_tag(Tag::StripOffsets);
     if data.len() == 0 {
       if camera.model == "DSLR-A100" {
@@ -66,7 +66,7 @@ impl<'a> Decoder for ArwDecoder<'a> {
           ArwDecoder::decode_arw1(src, width as usize, height as usize)
         } else {
           match bps {
-            8 => {let curve = try!(ArwDecoder::get_curve(raw)); ArwDecoder::decode_arw2(src, width as usize, height as usize, &curve)},
+            8 => {let curve = (ArwDecoder::get_curve(raw))?; ArwDecoder::decode_arw2(src, width as usize, height as usize, &curve)},
             12 => decode_12le(src, width as usize, height as usize),
             _ => return Err(format!("ARW2: Don't know how to decode images with {} bps", bps)),
           }
@@ -75,7 +75,7 @@ impl<'a> Decoder for ArwDecoder<'a> {
       _ => return Err(format!("ARW: Don't know how to decode type {}", compression).to_string()),
     };
 
-    ok_image(camera, width, height, try!(self.get_wb()), image)
+    ok_image(camera, width, height, (self.get_wb())?, image)
   }
 }
 

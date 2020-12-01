@@ -5,7 +5,7 @@ use std::error::Error;
 use std::panic;
 
 macro_rules! fetch_tag {
-  ($tiff:expr, $tag:expr, $message:expr) => (try!($tiff.find_entry($tag).ok_or($message.to_string())););
+  ($tiff:expr, $tag:expr, $message:expr) => (($tiff.find_entry($tag).ok_or($message.to_string())?););
 }
 
 extern crate toml;
@@ -203,11 +203,11 @@ impl RawHide {
     };
 
     macro_rules! use_decoder {
-        ($dec:ty, $buf:ident, $tiff:ident, $rawdec:ident) => (Ok(Box::new(<$dec>::new($buf, $tiff, $rawdec)) as Box<Decoder>));
+        ($dec:ty, $buf:ident, $tiff:ident, $rawdec:ident) => (Ok(Box::new(<$dec>::new($buf, $tiff, $rawdec)) as Box<dyn Decoder>));
     }
 
     let tiff = TiffIFD::new_root(buffer, 4, 0, endian);
-    let make: &str = &(try!(tiff.find_entry(Tag::Make).ok_or("Couldn't find Make".to_string())).get_str().to_string());
+    let make: &str = &((tiff.find_entry(Tag::Make).ok_or("Couldn't find Make".to_string()))?.get_str().to_string());
 
     match make {
       "SONY"                    => use_decoder!(arw::ArwDecoder, buffer, tiff, self),
