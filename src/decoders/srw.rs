@@ -30,7 +30,7 @@ impl<'a> Decoder for SrwDecoder<'a> {
   }
 
   fn image(&self) -> Result<Image,String> {
-    let camera = try!(self.identify());
+    let camera = (self.identify())?;
     let data = self.tiff.find_ifds_with_tag(Tag::StripOffsets);
     let raw = data[0];
     let width = fetch_tag!(raw, Tag::ImageWidth, "SRW: Couldn't find width").get_u32(0);
@@ -75,7 +75,7 @@ impl<'a> Decoder for SrwDecoder<'a> {
       x => return Err(format!("SRW: Don't know how to handle compression {}", x).to_string()),
     };
 
-    ok_image(camera, width, height, try!(self.get_wb()), image)
+    ok_image(camera, width, height, (self.get_wb())?, image)
   }
 }
 

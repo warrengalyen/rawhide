@@ -25,6 +25,7 @@ pub enum Tag {
   SonyKey        = 0x7221,
   SonyGRBG       = 0x7303,
   SonyRGGB       = 0x7313,
+  CFAPattern     = 0x828E,
   ExifIFDPointer = 0x8769,
   Makernote      = 0x927C,
   SrwSensorAreas = 0xA010,
@@ -191,7 +192,7 @@ impl<'a> TiffEntry<'a> {
 
     let bytesize: usize = (count as usize) << DATASHIFTS[typ as usize];
     let doffset: usize = if bytesize <= 4 {
-      (offset + 8)
+      offset + 8
     } else {
       (e.ru32(buf, offset+8) as usize) - base_offset
     };

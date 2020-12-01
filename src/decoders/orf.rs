@@ -29,7 +29,7 @@ impl<'a> Decoder for OrfDecoder<'a> {
   }
 
   fn image(&self) -> Result<Image,String> {
-    let camera = try!(self.identify());
+    let camera = (self.identify())?;
     let data = self.tiff.find_ifds_with_tag(Tag::StripOffsets);
     let raw = data[0];
     let width = fetch_tag!(raw, Tag::ImageWidth, "ORF: Couldn't find width").get_u32(0);
@@ -60,7 +60,7 @@ impl<'a> Decoder for OrfDecoder<'a> {
     } else {
       OrfDecoder::decode_compressed(src, width as usize, height as usize)
     };
-    ok_image(camera, width, height, try!(self.get_wb()), image)
+    ok_image(camera, width, height, (self.get_wb())?, image)
   }
 }
 
@@ -165,7 +165,7 @@ impl<'a> OrfDecoder<'a> {
       let iproc = fetch_tag!(self.tiff,Tag::OlympusImgProc, "ORF: Couldn't find ImgProc");
       let poff = iproc.parent_offset() - 12;
       let off = (iproc.get_u32(0) as usize) + poff;
-      let ifd = try!(TiffIFD::new(self.buffer, off, 0, 0, self.tiff.get_endian()));
+      let ifd = (TiffIFD::new(self.buffer, off, 0, 0, self.tiff.get_endian()))?;
       let wbs = fetch_tag!(ifd, Tag::ImageWidth, "ORF: Couldn't find WBs");
       if wbs.count() == 4 {
         let off = poff + wbs.doffset();

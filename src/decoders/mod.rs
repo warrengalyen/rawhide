@@ -239,8 +239,8 @@ impl RawHide {
   }
 
   pub fn decode(&self, reader: &mut Read) -> Result<Image, String> {
-    let buffer = try!(Buffer::new(reader));
-    let decoder = try!(self.get_decoder(&buffer));
+    let buffer = (Buffer::new(reader))?;
+    let decoder = (self.get_decoder(&buffer))?;
     decoder.image()
   }
 
