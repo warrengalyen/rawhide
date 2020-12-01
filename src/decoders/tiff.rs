@@ -4,36 +4,39 @@ use std::str;
 use num::FromPrimitive;
 
 enum_from_primitive! {
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum Tag {
-  ImageWidth     = 0x0100,
-  ImageLength    = 0x0101,
-  BitsPerSample  = 0x0102,
-  Compression    = 0x0103,
-  Make           = 0x010F,
-  Model          = 0x0110,
-  StripOffsets   = 0x0111,
-  StripByteCounts= 0x0117,
-  SubIFDs        = 0x014A,
-  EpsonWB        = 0x0E80,
-  OlympusRedMul  = 0x1017,
-  OlympusBlueMul = 0x1018,
-  OlympusImgProc = 0x2040,
-  SonyCurve      = 0x7010,
-  SonyOffset     = 0x7200,
-  SonyLength     = 0x7201,
-  SonyKey        = 0x7221,
-  SonyGRBG       = 0x7303,
-  SonyRGGB       = 0x7313,
-  CFAPattern     = 0x828E,
-  ExifIFDPointer = 0x8769,
-  Makernote      = 0x927C,
-  SrwSensorAreas = 0xA010,
-  SrwRGGBLevels  = 0xA021,
-  SrwRGGBBlacks  = 0xA028,
-  DNGPrivateArea = 0xC634,
-
-}
+  #[derive(Debug, Copy, Clone, PartialEq)]
+  pub enum Tag {
+    ImageWidth     = 0x0100,
+    ImageLength    = 0x0101,
+    BitsPerSample  = 0x0102,
+    Compression    = 0x0103,
+    Make           = 0x010F,
+    Model          = 0x0110,
+    StripOffsets   = 0x0111,
+    StripByteCounts= 0x0117,
+    SubIFDs        = 0x014A,
+    EpsonWB        = 0x0E80,
+    KodakWB        = 0x0F00,
+    OlympusRedMul  = 0x1017,
+    OlympusBlueMul = 0x1018,
+    OlympusImgProc = 0x2040,
+    SonyCurve      = 0x7010,
+    SonyOffset     = 0x7200,
+    SonyLength     = 0x7201,
+    SonyKey        = 0x7221,
+    SonyGRBG       = 0x7303,
+    SonyRGGB       = 0x7313,
+    CFAPattern     = 0x828E,
+    ExifIFDPointer = 0x8769,
+    Makernote      = 0x927C,
+    SrwSensorAreas = 0xA010,
+    SrwRGGBLevels  = 0xA021,
+    SrwRGGBBlacks  = 0xA028,
+    DNGPrivateArea = 0xC634,
+    KdcWidth       = 0xFD00,
+    KdcLength      = 0xFD01,
+    KdcOffset      = 0xFD04,
+  }
 }
                           // 0-1-2-3-4-5-6-7-8-9-10-11-12-13
 const DATASHIFTS: [u8;14] = [0,0,0,1,2,3,0,0,1,2, 3, 2, 3, 2];

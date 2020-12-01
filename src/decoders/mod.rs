@@ -17,6 +17,7 @@ mod mef;
 mod orf;
 mod srw;
 mod erf;
+mod kdc;
 use self::basics::*;
 use self::tiff::*;
 
@@ -187,12 +188,12 @@ impl RawHide {
     }
   }
 
-  pub fn get_decoder<'b>(&'b self, buf: &'b Buffer) -> Result<Box<Decoder+'b>, String> {
+  pub fn get_decoder<'b>(&'b self, buf: &'b Buffer) -> Result<Box<dyn Decoder+'b>, String> {
     let buffer = &buf.buf;
 
     if mrw::is_mrw(buffer) {
       let dec = Box::new(mrw::MrwDecoder::new(buffer, &self));
-      return Ok(dec as Box<Decoder>);
+      return Ok(dec as Box<dyn Decoder>);
     }
 
     let endian = match LEu16(&buffer, 0) {
@@ -216,6 +217,7 @@ impl RawHide {
       "OLYMPUS OPTICAL CO.,LTD" => use_decoder!(orf::OrfDecoder, buffer, tiff, self),
       "SAMSUNG"                 => use_decoder!(srw::SrwDecoder, buffer, tiff, self),
       "SEIKO EPSON CORP."       => use_decoder!(erf::ErfDecoder, buffer, tiff, self),
+      "EASTMAN KODAK COMPANY"   => use_decoder!(kdc::KdcDecoder, buffer, tiff, self),
       make => Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string()),
     }
   }
