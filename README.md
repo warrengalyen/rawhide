@@ -31,6 +31,7 @@ The library is still in a very early stage with only a few formats implemented:
   * Samsung SRW
   * Epson ERF
   * Kodak KDC
+  * Kodak DCS
   
 Usage
 -----
