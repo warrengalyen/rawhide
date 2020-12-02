@@ -72,13 +72,8 @@ impl<'a> MrwDecoder<'a> {
 }
 
 impl<'a> Decoder for MrwDecoder<'a> {
-    fn identify(&self) -> Result<&Camera, String> {
-        let make = fetch_tag!(self.tiff, Tag::Make).get_str();
-        let model = fetch_tag!(self.tiff, Tag::Model).get_str();
-        self.rawhide.check_supported(make, model)
-    }
-
     fn image(&self) -> Result<Image, String> {
+        let camera = self.rawhide.check_supported(&self.tiff)?;
         let src = &self.buffer[self.data_offset..self.buffer.len()];
         let w = self.raw_width as usize;
         let h = self.raw_height as usize;
@@ -105,11 +100,6 @@ impl<'a> Decoder for MrwDecoder<'a> {
                 self.wb_vals[3] as f32,
                 f32::NAN,
             ]
-        };
-
-        let camera = match self.identify() {
-            Ok(val) => val,
-            Err(e) => return Err(e),
         };
 
         ok_image(camera, self.raw_width as u32, self.raw_height as u32, wb_coeffs, buffer)
