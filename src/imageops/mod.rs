@@ -31,12 +31,22 @@ impl OpBuffer {
   }
 
   pub fn mutate_lines<F>(&mut self, closure: &F)
-  where F : Fn(&mut [f32], usize)+std::marker::Sync {
+    where F : Fn(&mut [f32], usize)+std::marker::Sync {
 
-  self.data.par_chunks_mut(self.width*self.colors).enumerate().for_each(|(row, line)| {
-    closure(line, row);
-  });
-}
+    self.data.par_chunks_mut(self.width*self.colors).enumerate().for_each(|(row, line)| {
+      closure(line, row);
+    });
+  }
+
+  pub fn process_into_new<F>(&self, colors: usize, closure: &F) -> OpBuffer
+    where F : Fn(&mut [f32], &[f32])+std::marker::Sync {
+
+    let mut out = OpBuffer::new(self.width, self.height, colors);
+    out.data.par_chunks_mut(out.width*out.colors).enumerate().for_each(|(row, line)| {
+      closure(line, &self.data[self.width*self.colors*row..]);
+    });
+    out
+  }
 }
 
 #[inline] pub fn fcol (img: &Image, row: usize, col: usize) -> usize {
