@@ -5,11 +5,19 @@ use std::error::Error;
 use std::panic;
 
 macro_rules! fetch_tag {
-  ($tiff:expr, $tag:expr) => (try!($tiff.find_entry($tag).ok_or(format!("Couldn't find tag {}",stringify!($tag)).to_string())););
+  ($tiff:expr, $tag:expr) => (
+      $tiff.find_entry($tag).ok_or(
+        format!("Couldn't find tag {}",stringify!($tag)).to_string()
+      )?
+  );
 }
 
 macro_rules! fetch_ifd {
-  ($tiff:expr, $tag:expr) => (try!($tiff.find_first_ifd($tag).ok_or(format!("Couldn't find ifd with tag {}",stringify!($tag)).to_string())););
+  ($tiff:expr, $tag:expr) => (
+      $tiff.find_first_ifd($tag).ok_or(
+        format!("Couldn't find ifd with tag {}",stringify!($tag)).to_string()
+      )?
+  );
 }
 
 extern crate toml;
@@ -231,7 +239,7 @@ impl RawHide {
       return Ok(dec as Box<dyn Decoder>);
     }
 
-    let tiff = try!(TiffIFD::new_file(buffer));
+    let tiff = TiffIFD::new_file(buffer)?;
     macro_rules! use_decoder {
         ($dec:ty, $buf:ident, $tiff:ident, $rawdec:ident) => (Ok(Box::new(<$dec>::new($buf, $tiff, $rawdec)) as Box<dyn Decoder>));
     }
