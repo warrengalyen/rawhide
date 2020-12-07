@@ -26,6 +26,7 @@ mod kdc;
 mod dcs;
 mod rw2;
 mod raf;
+mod dcr;
 use self::tiff::*;
 
 pub static CAMERAS_TOML: &'static str = include_str!("../../data/cameras/all.toml");
@@ -245,6 +246,7 @@ impl RawHide {
       "SEIKO EPSON CORP."       => use_decoder!(erf::ErfDecoder, buffer, tiff, self),
       "EASTMAN KODAK COMPANY"   => use_decoder!(kdc::KdcDecoder, buffer, tiff, self),
       "KODAK"                   => use_decoder!(dcs::DcsDecoder, buffer, tiff, self),
+      "Kodak"                   => use_decoder!(dcr::DcrDecoder, buffer, tiff, self),
       "Panasonic"               => use_decoder!(rw2::Rw2Decoder, buffer, tiff, self),
       "FUJIFILM"                => use_decoder!(raf::RafDecoder, buffer, tiff, self),
       make => Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string()),
