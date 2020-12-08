@@ -267,6 +267,7 @@ impl RawHide {
       "FUJIFILM"                    => use_decoder!(raf::RafDecoder, buffer, tiff, self),
       "PENTAX Corporation"          => use_decoder!(pef::PefDecoder, buffer, tiff, self),
       "RICOH IMAGING COMPANY, LTD." => use_decoder!(pef::PefDecoder, buffer, tiff, self),
+      "PENTAX"                      => use_decoder!(pef::PefDecoder, buffer, tiff, self),
       make => Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string()),
     }
   }
