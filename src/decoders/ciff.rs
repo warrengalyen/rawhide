@@ -58,7 +58,7 @@ impl<'a> CiffIFD<'a> {
 
     for i in 0..dircount {
       let entry_offset: usize = start+valuedata_size+2+i*10;
-      let e = try!(CiffEntry::new(buf, start, entry_offset));
+      let e = CiffEntry::new(buf, start, entry_offset)?;
       if e.typ == 0x2800 || e.typ == 0x3000 { // SubIFDs
         if depth < 10 { // Avoid infinite looping IFDs
           let ifd = CiffIFD::new(buf, e.data_offset, e.data_offset+e.bytesize, depth+1);

@@ -25,6 +25,7 @@ mod ljpeg;
 mod basics;
 mod cfa;
 mod tiff;
+mod ciff;
 mod mrw;
 mod arw;
 mod mef;
@@ -38,7 +39,9 @@ mod raf;
 mod dcr;
 mod dng;
 mod pef;
+mod crw;
 use self::tiff::*;
+use self::ciff::*;
 
 pub static CAMERAS_TOML: &'static str = include_str!("../../data/cameras/all.toml");
 
@@ -49,6 +52,7 @@ pub trait Decoder {
 #[derive(Debug, Clone)]
 pub struct Buffer {
   buf: Vec<u8>,
+  size: usize,
 }
 
 impl Buffer {
@@ -57,9 +61,11 @@ impl Buffer {
     if let Err(err) = reader.read_to_end(&mut buffer) {
       return Err(format!("IOError: {}", err).to_string())
     }
+    let size = buffer.len();
     buffer.extend([0;16].iter().cloned());
     Ok(Buffer {
       buf: buffer,
+      size: size,
     })
   }
 }
@@ -248,6 +254,12 @@ impl RawHide {
       return Ok(Box::new(dng::DngDecoder::new(buffer, tiff, self)))
     }
 
+    if ciff::is_ciff(buffer) {
+      let ciff = try!(CiffIFD::new_file(buf));
+      let dec = Box::new(crw::CrwDecoder::new(buffer, ciff, &self));
+      return Ok(dec as Box<Decoder>);
+    }
+
     macro_rules! use_decoder {
         ($dec:ty, $buf:ident, $tiff:ident, $rawdec:ident) => (Ok(Box::new(<$dec>::new($buf, $tiff, $rawdec)) as Box<dyn Decoder>));
     }
@@ -272,14 +284,18 @@ impl RawHide {
     }
   }
 
-  pub fn check_supported_with_mode<'a>(&'a self, tiff: &'a TiffIFD, mode: &str) -> Result<&Camera, String> {
-    let make = fetch_tag!(tiff, Tag::Make).get_str();
-    let model = fetch_tag!(tiff, Tag::Model).get_str();
-    
+  pub fn check_supported_with_everything<'a>(&'a self, make: &str, model: &str, mode: &str) -> Result<&Camera, String> {
     match self.cameras.get(&(make.to_string(),model.to_string(),mode.to_string())) {
       Some(cam) => Ok(cam),
       None => Err(format!("Couldn't find camera \"{}\" \"{}\" mode \"{}\"", make, model, mode)),
     }
+  }
+
+  pub fn check_supported_with_mode<'a>(&'a self, tiff: &'a TiffIFD, mode: &str) -> Result<&Camera, String> {
+    let make = fetch_tag!(tiff, Tag::Make).get_str();
+    let model = fetch_tag!(tiff, Tag::Model).get_str();
+
+    self.check_supported_with_everything(make, model, mode)
   }
 
   pub fn check_supported<'a>(&'a self, tiff: &'a TiffIFD) -> Result<&Camera, String> {
