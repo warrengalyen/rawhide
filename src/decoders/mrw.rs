@@ -84,9 +84,7 @@ impl<'a> Decoder for MrwDecoder<'a> {
             decode_12be_unpacked(&src, w, h)
         };
 
-        let swapped_wb = false;
-
-        let wb_coeffs = if swapped_wb {
+        let wb_coeffs = if camera.find_hint("swapped_wb") {
             [
                 self.wb_vals[2] as f32,
                 self.wb_vals[0] as f32,
