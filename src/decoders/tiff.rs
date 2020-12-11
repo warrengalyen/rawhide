@@ -53,6 +53,7 @@ enum_from_primitive! {
     SrwRGGBLevels    = 0xA021,
     SrwRGGBBlacks    = 0xA028,
     DNGVersion       = 0xC612,
+    Linearization    = 0xC618,
     BlackLevels      = 0xC61A,
     WhiteLevel       = 0xC61D,
     ColorMatrix2     = 0xC622,
