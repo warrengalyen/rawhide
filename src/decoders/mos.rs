@@ -23,7 +23,8 @@ impl<'a> MosDecoder<'a> {
 impl<'a> Decoder for MosDecoder<'a> {
   fn image(&self) -> Result<Image,String> {
     let make = self.xmp_tag("Make")?;
-    let model = self.xmp_tag("Model")?;
+    let model_full = self.xmp_tag("Model")?.to_string();
+    let model = model_full.split_terminator("(").next().unwrap();
     let camera = self.rawhide.check_supported_with_everything(&make, &model, "")?;
 
     let raw = fetch_ifd!(&self.tiff, Tag::TileOffsets);
