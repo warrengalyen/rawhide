@@ -2,7 +2,7 @@
 
 This is a rust library to decode image data and some metadata from digital camera images. Given an image in a supported format you will be able to retrieve everthing needed to process the image:
 
-  * Identification of the camera that produced the image (both the EXIF name and a clean/canonical name)
+  * Identification of the camera that produced the image (both the EXIF name and a cleaned up name)
   * The raw pixels themselves, exactly as encoded by the camera
   * The number of pixels to crop on the top, right, bottom, left of the image to only use the actual image area
   * The black and white points of each of the color channels
@@ -70,7 +70,7 @@ fn main() {
   let rawhide = decoders::RawHide::new();
   let image = rawhide.decode_safe(file).unwrap();
   println!("Found camera \"{}\" model \"{}\"", image.make, image.model);
-  println!("Found canonical named camera \"{}\" model \"{}\"", image.canonical_make, image.canonical_model);
+  println!("Found clean named camera \"{}\" model \"{}\"", image.clean_make, image.clean_model);
 
   println!("Image size is {}x{}", image.width, image.height);
   println!("WB coeffs are {:?}", image.wb_coeffs);
