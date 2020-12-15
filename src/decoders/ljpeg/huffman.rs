@@ -242,11 +242,13 @@ impl HuffTable {
     Ok(())
   }
 
+
   // Taken from Figure F.16: extract next coded symbol from input stream
   pub fn huff_decode(&self, pump: &mut BitPump) -> Result<i32,String> {
     if !self.initialized {
-       return Err("ljpeg: Trying to read from uninitialized HuffTable".to_string());
+      return Err("ljpeg: Trying to read from uninitialized HuffTable".to_string());
     }
+
     //First attempt to do complete decode, by using the first 14 bits
     let mut code: i32 = pump.peek_bits(14) as i32;
     if self.use_bigtable {
@@ -305,6 +307,34 @@ impl HuffTable {
     }
 
     return Ok(0)
+  }
+
+  pub fn huff_len(&self, pump: &mut BitPump) -> Result<i32,String> {
+    let mut code: i32 = pump.peek_bits(8) as i32;
+    let val = self.numbits[code as usize] as i32;
+    let mut l = val & 15;
+    //println!("code {} val {} l {}", code, val, l);
+    if l != 0 {
+      pump.consume_bits(l as u32);
+      return Ok(val >> 4)
+    }
+    pump.consume_bits(8);
+    l = 8;
+    while code > self.maxcode[l as usize] {
+      let temp = pump.get_bits(1) as i32;
+      code = (code << 1) | temp;
+      l += 1;
+    }
+
+    // With garbage input we may reach the sentinel value l = 17.
+    if l > self.precision as i32 || self.valptr[l as usize] == 0xff {
+      return Err(format!("ljpeg: bad Huffman code: {}", l).to_string())
+    } else {
+      return Ok(self.huffval[
+        self.valptr[l as usize] as usize +
+        (code - (self.mincode[l as usize] as i32)) as usize
+      ] as i32);
+    }
   }
 }
 
