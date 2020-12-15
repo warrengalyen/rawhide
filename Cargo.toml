@@ -1,6 +1,6 @@
 [package]
 name = "rawhide"
-version = "0.25.1"
+version = "0.26.0"
 authors = ["Warren Galyen"]
 description = "A library to decode camera raw formats"
 #documentation = "..."
