@@ -8,4 +8,3 @@ color_matrix = [9698, -3367, -914, -4706, 12584, 2368, -837, 968, 5801]
 color_pattern = "RGGB"
 crops = [0,0,0,0]
 hints = ["msb32"]
-
