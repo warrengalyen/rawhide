@@ -106,7 +106,7 @@ impl<'a> Decoder for NefDecoder<'a> {
 
     // Make sure we always use a 12/14 bit mode to get correct white/blackpoints
     let mode = format!("{}bit", bps).to_string();
-    let camera = self.rawhide.check_supported_with_mode(&self.tiff, &mode)?;
+    let camera = self.rawhide.check_supported_with_mode(&self.tiff, &mode);
 
     let offset = fetch_tag!(raw, Tag::StripOffsets).get_usize(0);
     let size = fetch_tag!(raw, Tag::StripByteCounts).get_usize(0);
@@ -171,15 +171,52 @@ impl<'a> NefDecoder<'a> {
                       levels.get_force_u16(37) as f32, NAN]),
         0x103 =>  Ok([levels.get_force_u16(10) as f32, levels.get_force_u16(11) as f32,
                       levels.get_force_u16(12) as f32, NAN]),
+        0x204 | 0x205 => {
+          let serial = fetch_tag!(self.tiff, Tag::NefSerial);
+          let data = serial.get_data();
+          let mut serialno = 0 as usize;
+          for i in 0..serial.count() {
+            if data[i] == 0 { break }
+            serialno = serialno*10 + if data[i] >= 48 && data[i] <= 57 { // "0" to "9"
+              (data[i]-48) as usize
+            } else {
+              (data[i]%10) as usize
+            };
+          }
+
+          // Get the "decryption" key
+          let keydata = fetch_tag!(self.tiff, Tag::NefKey).get_data();
+          let keyno = (keydata[0]^keydata[1]^keydata[2]^keydata[3]) as usize;
+
+          let src = if version == 0x204 {
+            &levels.get_data()[284..]
+          } else {
+            &levels.get_data()[4..]
+          };
+
+          let ci = WB_SERIALMAP[serialno & 0xff] as u32;
+          let mut cj = WB_KEYMAP[keyno & 0xff] as u32;
+          let mut ck = 0x60 as u32;
+          let mut buf = [0 as u8; 280];
+          for i in 0..280 {
+            cj += ci * ck;
+            ck += 1;
+            buf[i] = src[i] ^ (cj as u8);
+          }
+
+          let off = if version == 0x204 { 6 } else { 14 };
+          Ok([BEu16(&buf, off) as f32, BEu16(&buf, off+2) as f32,
+              BEu16(&buf, off+6) as f32, NAN])
+        },
         x => Err(format!("NEF: Don't know about WB version 0x{:x}", x).to_string()),
       }
     } else if let Some(levels) = self.tiff.find_entry(Tag::NefWB2) {
       let data = levels.get_data();
       if data[0..3] == b"NRW"[..] {
-        let offset = if data[3..7] == b"0100"[..] {
-          56
-        } else {
+        let offset = if data[4..8] == b"0100"[..] {
           1556
+        } else {
+          56
         };
 
         Ok([(LEu32(data, offset) << 2) as f32,
@@ -234,7 +271,7 @@ impl<'a> NefDecoder<'a> {
     }
 
     // Create the huffman table used to decode
-    let mut htable = self.create_hufftable(huff_select, bps)?;
+    let mut htable = try!(self.create_hufftable(huff_select, bps));
 
     // Setup the predictors
     let mut pred_up1: [i32;2] = [stream.get_u16() as i32, stream.get_u16() as i32];
