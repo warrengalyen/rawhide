@@ -64,6 +64,7 @@ impl<'a> Decoder for DngDecoder<'a> {
       clean_model: clean_model,
       width: width,
       height: height,
+      cpp: 1,
       wb_coeffs: self.get_wb()?,
       data: image.into_boxed_slice(),
       blacklevels: self.get_blacklevels(raw)?,
