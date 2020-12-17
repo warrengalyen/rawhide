@@ -16,6 +16,7 @@ enum_from_primitive! {
     PanaWBs2R        = 0x0024,
     PanaWBs2G        = 0x0025,
     PanaWBs2B        = 0x0026,
+    Cr2PowerShotWB   = 0x0029,
     NewSubFileType   = 0x00FE,
     NefMeta1         = 0x008c,
     NefMeta2         = 0x0096,
