@@ -61,14 +61,14 @@ impl<'a> Decoder for Cr2Decoder<'a> {
 
       (width, height, out)
     };
-    ok_image(camera, width, height, self.get_wb()?, image)
+    ok_image(camera, width, height, self.get_wb(camera)?, image)
   }
 }
 
 impl<'a> Cr2Decoder<'a> {
-  fn get_wb(&self) -> Result<[f32;4], String> {
+    fn get_wb(&self, cam: &Camera) -> Result<[f32;4], String> {
     let levels = fetch_tag!(self.tiff, Tag::Cr2ColorData);
-    let offset = 63;
+    let offset = if cam.wb_offset != 0 {cam.wb_offset} else {63};
     Ok([levels.get_force_u16(offset) as f32, levels.get_force_u16(offset+1) as f32,
         levels.get_force_u16(offset+3) as f32, NAN])
   }
