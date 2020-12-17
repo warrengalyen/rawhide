@@ -105,7 +105,7 @@ impl HuffTable {
       dng_compatible: true,
       initialized: false,
     };
-    try!(tbl.initialize(use_bigtable));
+    tbl.initialize(use_bigtable)?;
     Ok(tbl)
   }
 
