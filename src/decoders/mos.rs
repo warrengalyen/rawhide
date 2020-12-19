@@ -86,7 +86,7 @@ impl<'a> MosDecoder<'a> {
   }
 
   pub fn decode_compressed(&self, cam: &Camera, src: &[u8], width: usize, height: usize) -> Result<Vec<u16>,String> {
-    let decompressor = LjpegDecompressor::new(src, true)?;
+    let decompressor = LjpegDecompressor::new_full(src, true, true)?;
     let ljpegout = decompressor.decode_leaf(width, height)?;
     if cam.find_hint("interlaced") {
       let mut out = vec![0 as u16; width*height];
