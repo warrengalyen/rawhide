@@ -5,12 +5,12 @@ extern crate num;
 
 extern crate itertools;
 
-pub mod decoders;
-use decoders::{RawHide, Image};
-pub mod imageops;
+#[doc(hidden)] pub mod decoders;
+pub use decoders::Image;
+#[doc(hidden)] pub mod imageops;
 
 lazy_static! {
-    static ref LOADER: RawHide = decoders::RawHide::new();
+    static ref LOADER: decoders::RawHide = decoders::RawHide::new();
   }
   
   pub fn decode(path: &str) -> Result<Image, String> {
