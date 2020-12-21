@@ -6,7 +6,6 @@ use std::io::BufWriter;
 extern crate time;
 extern crate toml;
 extern crate rawhide;
-use rawhide::imageops;
 
 fn usage() {
     println!("rawhide <file> [outfile]");
@@ -68,7 +67,7 @@ fn main() {
     println!("Image min: {}", min);
     println!("Image max: {}", max);
 
-    let decoded = imageops::simple_decode(&image, 0, 0);
+    let decoded = image.to_rgb(0, 0).unwrap();
 
     let uf = match File::create(outfile) {
         Ok(val) => val,
