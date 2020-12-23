@@ -52,9 +52,8 @@ mod srw;
 mod tfr;
 mod tiff;
 mod x3f;
-use self::ciff::*;
-pub use self::image::*;
 use self::tiff::*;
+pub use self::image::*;
 
 pub static CAMERAS_TOML: &'static str = include_str!("../../data/cameras/all.toml");
 
@@ -299,7 +298,7 @@ impl RawHide {
     }
 
     if ciff::is_ciff(buffer) {
-      let ciff = try!(CiffIFD::new_file(buf));
+      let ciff = ciff::CiffIFD::new_file(buf)?;
       let dec = Box::new(crw::CrwDecoder::new(buffer, ciff, &self));
       return Ok(dec as Box<Decoder>);
     }
