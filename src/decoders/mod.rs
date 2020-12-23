@@ -24,6 +24,8 @@ extern crate toml;
 mod ari;
 mod arw;
 mod basics;
+mod packed;
+mod pumps;
 pub mod cfa;
 mod ciff;
 mod cr2;
