@@ -49,6 +49,7 @@ mod rw2;
 mod srw;
 mod tfr;
 mod tiff;
+mod x3f;
 use self::ciff::*;
 pub use self::image::*;
 use self::tiff::*;
@@ -303,6 +304,11 @@ impl RawHide {
 
     if ari::is_ari(buffer) {
       let dec = Box::new(ari::AriDecoder::new(buffer, &self));
+      return Ok(dec as Box<Decoder>);
+    }
+
+    if x3f::is_x3f(buffer) {
+      let dec = Box::new(x3f::X3fDecoder::new(buf, &self));
       return Ok(dec as Box<Decoder>);
     }
 
