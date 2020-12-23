@@ -1,5 +1,7 @@
 # RawHide
 
+[![Build Status](https://travis-ci.org/warrengalyen/rawhide.svg?branch=master)](https://travis-ci.org/warrengalyen/rawhide)
+
 This is a rust library to decode image data and some metadata from digital camera images. Given an image in a supported format you will be able to retrieve everthing needed to process the image:
 
   * Identification of the camera that produced the image (both the EXIF name and a cleaned up name)
