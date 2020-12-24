@@ -6,11 +6,11 @@ use std::f32::NAN;
 pub struct NakedDecoder<'a> {
   buffer: &'a [u8],
   rawhide: &'a RawHide,
-  camera: &'a Camera,
+  camera: Camera,
 }
 
 impl<'a> NakedDecoder<'a> {
-  pub fn new(buf: &'a [u8], cam: &'a Camera, rawhide: &'a RawHide) -> NakedDecoder<'a> {
+  pub fn new(buf: &'a [u8], cam: Camera, rawhide: &'a RawHide) -> NakedDecoder<'a> {
     NakedDecoder {
       buffer: buf,
       camera: cam,
@@ -36,6 +36,6 @@ impl<'a> Decoder for NakedDecoder<'a> {
       }
     };
 
-    ok_image(self.camera, width, height, [NAN,NAN,NAN,NAN], image)
+    ok_image(self.camera.clone(), width, height, [NAN,NAN,NAN,NAN], image)
   }
 }
