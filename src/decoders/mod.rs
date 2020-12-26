@@ -57,6 +57,8 @@ use self::tiff::*;
 pub use self::image::*;
 
 pub static CAMERAS_TOML: &'static str = include_str!("../../data/cameras/all.toml");
+pub static SAMPLE: &'static str = "\nPlease submit samples at https://raw.pixls.us/";
+pub static BUG: &'static str = "\nPlease file a bug with a sample file at https://github.com/warrengalyen/rawhide/issues/new";
 
 pub trait Decoder {
   fn image(&self) -> Result<RawImage, String>;
@@ -381,7 +383,7 @@ impl RawHide {
           "NIKON"                       => use_decoder!(nrw::NrwDecoder, buffer, tiff, self),
           "Canon"                       => use_decoder!(cr2::Cr2Decoder, buffer, tiff, self),
           "Phase One A/S"               => use_decoder!(iiq::IiqDecoder, buffer, tiff, self),
-          make => Err(format!("Couldn't find a decoder for make \"{}\"", make).to_string()),
+          make => Err(format!("Couldn't find a decoder for make \"{}\".{}", make, SAMPLE).to_string()),
         };
       } else if tiff.has_entry(Tag::Software) {
         // Last ditch effort to identify Leaf cameras without Make and Model
@@ -396,13 +398,13 @@ impl RawHide {
       return Ok(Box::new(nkd::NakedDecoder::new(buffer, cam.clone(), self)))
     }
 
-    Err("Couldn't find a decoder for this file".to_string())
+    Err(format!("Couldn't find a decoder for this file.{}", SAMPLE).to_string())
   }
 
   pub fn check_supported_with_everything<'a>(&'a self, make: &str, model: &str, mode: &str) -> Result<Camera, String> {
     match self.cameras.get(&(make.to_string(),model.to_string(),mode.to_string())) {
       Some(cam) => Ok(cam.clone()),
-      None => Err(format!("Couldn't find camera \"{}\" \"{}\" mode \"{}\"", make, model, mode)),
+      None => Err(format!("Couldn't find camera \"{}\" \"{}\" mode \"{}\".{}", make, model, mode, SAMPLE)),
     }
   }
 
@@ -438,7 +440,7 @@ impl RawHide {
       self.decode(&mut f)
     }) {
       Ok(val) => val,
-      Err(_) => Err("Caught a panic while decoding, please file a bug and attach a sample file".to_string()),
+      Err(_) => Err(format!("Caught a panic while decoding.{}", BUG).to_string()),
     }
   }
 }
