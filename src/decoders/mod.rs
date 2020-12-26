@@ -192,7 +192,7 @@ impl Camera {
 }
 
 /// Possible values for the IFD tag Orientation (0x0112)
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Orientation {
   Normal,
   HorizontalFlip,
@@ -294,12 +294,12 @@ impl RawHide {
       if let Some(val) = ct.get("model_aliases") {
         for alias in val.as_array().unwrap() {
           camnames.push((alias[0].as_str().unwrap().to_string().clone(), 
-                          alias[1].as_str().unwrap().to_string().clone()));
+                         alias[1].as_str().unwrap().to_string().clone()));
         }
       }
 
-       // For each combination of alias and mode (including the base ones) create Camera
-       for (model, clean_model) in camnames {
+      // For each combination of alias and mode (including the base ones) create Camera
+      for (model, clean_model) in camnames {
         for ct in cammodes.clone() {
           let mut mcam = cam.clone();
           mcam.update_from_toml(ct);
@@ -319,7 +319,7 @@ impl RawHide {
       }
     }
 
-    RawHide {
+    RawHide{
       cameras: map,
       naked: naked,
     }
@@ -334,7 +334,7 @@ impl RawHide {
     }
 
     if ciff::is_ciff(buffer) {
-      let ciff = ciff::CiffIFD::new_file(buf)?;
+      let ciff = try!(ciff::CiffIFD::new_file(buf));
       let dec = Box::new(crw::CrwDecoder::new(buffer, ciff, &self));
       return Ok(dec as Box<Decoder>);
     }
@@ -354,8 +354,8 @@ impl RawHide {
         return Ok(Box::new(dng::DngDecoder::new(buffer, tiff, self)))
       }
 
-       // The DCS560C is really a CR2 camera so we just special case it here
-       if tiff.has_entry(Tag::Model) && fetch_tag!(tiff, Tag::Model).get_str() == "DCS560C" {
+      // The DCS560C is really a CR2 camera so we just special case it here
+      if tiff.has_entry(Tag::Model) && fetch_tag!(tiff, Tag::Model).get_str() == "DCS560C" {
         return Ok(Box::new(cr2::Cr2Decoder::new(buffer, tiff, self)))
       }
 
@@ -430,8 +430,8 @@ impl RawHide {
   }
 
   pub fn decode(&self, reader: &mut Read) -> Result<RawImage,String> {
-    let buffer = Buffer::new(reader)?;
-    let decoder = self.get_decoder(&buffer)?;
+    let buffer = try!(Buffer::new(reader));
+    let decoder = try!(self.get_decoder(&buffer));
     decoder.image()
   }
 
