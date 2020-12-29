@@ -6,3 +6,4 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+if: tag IS blank
