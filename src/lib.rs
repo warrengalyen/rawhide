@@ -94,16 +94,19 @@ pub use decoders::SRGBImage;
 lazy_static! {
     static ref LOADER: decoders::RawHide = decoders::RawHide::new();
   }
+
+  use std::path::Path;
   
   /// Take a path to a raw file and return a decoded image or an error
-    ///
-    /// # Example
-    /// ```rust,ignore
-    /// let image = match rawhide::decode("path/to/your/file.RAW") {
-    ///   Ok(val) => val,
-    ///   Err(e) => ... some appropriate action when the file is unreadable ...
-    /// };
-    /// ```
-  pub fn decode(path: &str) -> Result<RawImage, String> {
-    LOADER.decode_safe(path)
+  ///
+  /// # Example
+  /// ```rust,ignore
+  /// let image = match rawhide::decode("path/to/your/file.RAW") {
+  ///   Ok(val) => val,
+  ///   Err(e) => ... some appropriate action when the file is unreadable ...
+  /// };
+  /// ```
+    
+  pub fn decode<P: AsRef<Path>>(path: P) -> Result<RawImage,String> {
+    LOADER.decode_safe(path.as_ref())
   }
