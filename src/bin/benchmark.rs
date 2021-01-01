@@ -3,7 +3,6 @@ use std::error::Error;
 use std::fs::File;
 extern crate rawhide;
 extern crate time;
-use rawhide::decoders;
 
 fn usage() {
     println!("benchmark <file>");
@@ -32,14 +31,14 @@ fn main() {
             return;
         }
     };
-    let buffer = match decoders::Buffer::new(&mut f) {
+    let buffer = match rawhide::Buffer::new(&mut f) {
         Ok(val) => val,
         Err(e) => {
             error(&e);
             return;
         }
     };
-    let rawhide = decoders::RawHide::new();
+    let rawhide = rawhide::RawHide::new();
     let from_time = time::precise_time_ns();
     {
         for _ in 0..ITERATIONS {
