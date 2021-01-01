@@ -39,9 +39,5 @@ panic = "unwind"
 opt-level = 3
 
 [[bin]]
-name = "rawhide"
-doc = false
-
-[[bin]]
 name = "benchmark"
 doc = false
