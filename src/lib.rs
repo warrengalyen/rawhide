@@ -18,7 +18,7 @@
 //!     std::process::exit(2);
 //!   }
 //!   let file = &args[1];
-//!   let image = rawhide::decode(file).unwrap();
+//!   let image = rawhide::decode_file(file).unwrap();
 //!
 //!   // Write out the image as a grayscale PPM
 //!   let mut f = BufWriter::new(File::create(format!("{}.ppm",file)).unwrap());
@@ -63,11 +63,12 @@ pub use decoders::cfa::CFA;
 
 lazy_static! {
   static ref LOADER: RawHide = decoders::RawHide::new();
-  }
+}
 
-  use std::path::Path;
-  use std::error::Error;
+use std::path::Path;
+use std::error::Error;
 use std::fmt;
+use std::io::Read;
 
 /// Error type for any reason for the decode to fail
 #[derive(Debug)]
@@ -96,11 +97,25 @@ impl RawHideError {
   ///
   /// # Example
   /// ```rust,ignore
-  /// let image = match rawhide::decode("path/to/your/file.RAW") {
+  /// let image = match rawhide::decode_file("path/to/your/file.RAW") {
   ///   Ok(val) => val,
   ///   Err(e) => ... some appropriate action when the file is unreadable ...
   /// };
   /// ```
-  pub fn decode<P: AsRef<Path>>(path: P) -> Result<RawImage,RawHideError> {
-    LOADER.decode(path.as_ref()).map_err(|err| RawHideError::new(err))
+  pub fn decode_file<P: AsRef<Path>>(path: P) -> Result<RawImage,RawHideError> {
+    LOADER.decode_file(path.as_ref()).map_err(|err| RawHideError::new(err))
+  }
+  
+  /// Take a readable source and return a decoded image or an error
+  ///
+  /// # Example
+  /// ```rust,ignore
+  /// let mut file = match File::open(path).unwrap();
+  /// let image = match rawhide::decode(&mut file) {
+  ///   Ok(val) => val,
+  ///   Err(e) => ... some appropriate action when the file is unreadable ...
+  /// };
+  /// ```
+  pub fn decode(reader: &mut Read) -> Result<RawImage,RawHideError> {
+    LOADER.decode(reader).map_err(|err| RawHideError::new(err))
   }
