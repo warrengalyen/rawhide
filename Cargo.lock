@@ -246,7 +246,7 @@ dependencies = [
 
 [[package]]
 name = "rawhide"
-version = "0.35.0"
+version = "0.35.2"
 dependencies = [
  "byteorder",
  "enum_primitive",
