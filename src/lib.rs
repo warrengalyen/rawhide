@@ -78,11 +78,15 @@ pub struct RawHideError {
 
 impl fmt::Display for RawHideError {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "RawLoaderError: \"{}\"", self.msg)
+    write!(f, "RawHideError: \"{}\"", self.msg)
   }
 }
 
 impl Error for RawHideError {
+    // Implement description so that older versions of rust still work
+    fn description(&self) -> &str {
+      "description() is deprecated; use Display"
+    }
 }
 
 impl RawHideError {
