@@ -24,8 +24,8 @@ macro_rules! fetch_ifd {
 macro_rules! alloc_image {
   ($width:expr, $height:expr) => (
     {
-      if $width * $height > 500000000 {
-        panic!("rawhide: surely there's no such thing as a >500MP image!");
+      if $width * $height > 500000000 || $width > 50000 || $height > 50000 {
+        panic!("rawhide: surely there's no such thing as a >500MP or >50000 px wide/tall image!");
       }
       let mut out: Vec<u16> = vec![0; $width * $height];
       out
