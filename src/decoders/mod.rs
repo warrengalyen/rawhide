@@ -21,6 +21,18 @@ macro_rules! fetch_ifd {
   );
 }
 
+macro_rules! alloc_image {
+  ($width:expr, $height:expr) => (
+    {
+      if $width * $height > 500000000 {
+        panic!("rawhide: surely there's no such thing as a >500MP image!");
+      }
+      let mut out: Vec<u16> = vec![0; $width * $height];
+      out
+    }
+  );
+}
+
 extern crate toml;
 use self::toml::Value;
 mod image;
