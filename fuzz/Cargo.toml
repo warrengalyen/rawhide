@@ -1,0 +1,15 @@
+[package]
+name = "fuzz-rawhide"
+version = "0.0.1"
+authors = ["Warren Galyen"]
+edition = "2018"
+
+[dependencies.afl]
+version = "0.4"
+
+[dependencies.rawhide]
+path = "../"
+
+[profile.dev]
+panic = "unwind"
+opt-level = 3
