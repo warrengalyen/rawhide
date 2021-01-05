@@ -81,6 +81,7 @@ enum_from_primitive! {
     DNGPrivateArea   = 0xC634,
     Cr2StripeWidths  = 0xC640,
     ActiveArea       = 0xC68D,
+    MaskedAreas      = 0xC68E,
     RafRawSubIFD     = 0xF000,
     RafImageWidth    = 0xF001,
     RafImageLength   = 0xF002,
