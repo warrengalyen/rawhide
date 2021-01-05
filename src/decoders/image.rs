@@ -33,7 +33,7 @@ pub struct RawImage {
   pub crops: [usize;4],
   /// Areas of the sensor that is masked to prevent it from receiving light. Used to calculate
   /// black levels and noise. Each tuple represents a masked rectangle's top, right, bottom, left
-  pub blackarea: Vec<(u64,u64,u64,u64)>,
+  pub blackareas: Vec<(u64,u64,u64,u64)>,
   /// orientation of the image as indicated by the image metadata
   pub orientation: Orientation,
   /// image data itself, has width*height*cpp elements
@@ -77,15 +77,15 @@ impl RawImage {
     };
 
     // tuple format is top, right, bottom left
-    let mut blackarea: Vec<(u64,u64,u64,u64)> = Vec::new();
+    let mut blackareas: Vec<(u64,u64,u64,u64)> = Vec::new();
 
     if camera.blackareah.1 != 0 {
-        blackarea.push((camera.blackareah.0 as u64, width as u64,
+        blackareas.push((camera.blackareah.0 as u64, width as u64,
                         (camera.blackareah.0 + camera.blackareah.1) as u64, 0));
     }
 
     if camera.blackareav.1 != 0 {
-        blackarea.push((0, (camera.blackareav.0 + camera.blackareav.1) as u64,
+        blackareas.push((0, (camera.blackareav.0 + camera.blackareav.1) as u64,
                         height as u64, camera.blackareav.0 as u64))
     }
 
@@ -104,7 +104,7 @@ impl RawImage {
       xyz_to_cam: camera.xyz_to_cam,
       cfa: camera.cfa.clone(),
       crops: camera.crops,
-      blackarea: blackarea,
+      blackareas: blackareas,
       orientation: camera.orientation,
     }
   }

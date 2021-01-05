@@ -76,7 +76,7 @@ impl<'a> Decoder for DngDecoder<'a> {
       xyz_to_cam: self.get_color_matrix()?,
       cfa: if linear {CFA::new("")} else {self.get_cfa(raw)?},
       crops: self.get_crops(raw, width, height)?,
-      blackarea: self.get_masked_areas(raw),
+      blackareas: self.get_masked_areas(raw),
       orientation: orientation,
     })
   }
