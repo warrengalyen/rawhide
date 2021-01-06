@@ -21,13 +21,41 @@ macro_rules! fetch_ifd {
   );
 }
 
-macro_rules! alloc_image {
-  ($width:expr, $height:expr) => (
+macro_rules! alloc_image_plain {
+  ($width:expr, $height:expr, $dummy: expr) => (
     {
       if $width * $height > 500000000 || $width > 50000 || $height > 50000 {
         panic!("rawhide: surely there's no such thing as a >500MP or >50000 px wide/tall image!");
       }
-      let mut out: Vec<u16> = vec![0; $width * $height];
+      let mut out: Vec<u16> = if $dummy {
+        vec![0]
+      } else {
+        vec![0; $width * $height]
+      };
+      out
+    }
+  );
+}
+
+macro_rules! alloc_image {
+  ($width:expr, $height:expr, $dummy: expr) => (
+    {
+      let mut out = alloc_image_plain!($width, $height, $dummy);
+      if $dummy {
+        return out
+      }
+      out
+    }
+  );
+}
+
+macro_rules! alloc_image_ok {
+  ($width:expr, $height:expr, $dummy: expr) => (
+    {
+      let mut out = alloc_image_plain!($width, $height, $dummy);
+      if $dummy {
+        return Ok(out)
+      }
       out
     }
   );
@@ -77,7 +105,7 @@ pub static SAMPLE: &'static str = "\nPlease submit samples at https://raw.pixls.
 pub static BUG: &'static str = "\nPlease file a bug with a sample file at https://github.com/warrengalyen/rawhide/issues/new";
 
 pub trait Decoder {
-  fn image(&self) -> Result<RawImage, String>;
+  fn image(&self, dummy: bool) -> Result<RawImage, String>;
 }
 
 /// Buffer to hold an image in memory with enough extra space at the end for speed optimizations
@@ -302,11 +330,11 @@ impl Orientation {
 }
 
 pub fn ok_image(camera: Camera, width: usize, height: usize, wb_coeffs: [f32;4], image: Vec<u16>) -> Result<RawImage,String> {
-  Ok(RawImage::new(camera, width, height, wb_coeffs, image))
+  Ok(RawImage::new(camera, width, height, wb_coeffs, image, false))
 }
 
 pub fn ok_image_with_blacklevels(camera: Camera, width: usize, height: usize, wb_coeffs: [f32;4], blacks: [u16;4], image: Vec<u16>) -> Result<RawImage,String> {
-  let mut img = RawImage::new(camera, width, height, wb_coeffs, image);
+  let mut img = RawImage::new(camera, width, height, wb_coeffs, image, false);
   img.blacklevels = blacks;
   Ok(img)
 }
@@ -484,17 +512,17 @@ impl RawHide {
     self.check_supported_with_mode(tiff, "")
   }
 
-  fn decode_unsafe(&self, buffer: &Buffer) -> Result<RawImage,String> {
+  fn decode_unsafe(&self, buffer: &Buffer, dummy: bool) -> Result<RawImage,String> {
     let decoder = self.get_decoder(&buffer)?;
-    decoder.image()
+    decoder.image(dummy)
   }
 
    /// Decodes an input into a RawImage
-   pub fn decode(&self, reader: &mut Read) -> Result<RawImage,String> {
-    let buffer = try!(Buffer::new(reader));
+   pub fn decode(&self, reader: &mut Read, dummy: bool) -> Result<RawImage,String> {
+    let buffer = Buffer::new(reader)?;
 
     match panic::catch_unwind(|| {
-      self.decode_unsafe(&buffer)
+      self.decode_unsafe(&buffer, dummy)
     }) {
       Ok(val) => val,
       Err(_) => Err(format!("Caught a panic while decoding.{}", BUG).to_string()),
@@ -508,7 +536,7 @@ impl RawHide {
       Err(e) => {return Err(e.description().to_string())},
     };
     let mut buffered_file = BufReader::new(file);
-    self.decode(&mut buffered_file)
+    self.decode(&mut buffered_file, false)
   }
 
   // Decodes an unwraped input (just the image data with minimal metadata) into a RawImage

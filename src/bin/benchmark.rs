@@ -49,7 +49,7 @@ fn main() {
                     return;
                 }
             };
-            match decoder.image() {
+            match decoder.image(false) {
                 Ok(_) => {}
                 Err(e) => error(&e),
             }

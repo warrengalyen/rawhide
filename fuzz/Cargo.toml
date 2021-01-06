@@ -15,5 +15,9 @@ panic = "unwind"
 opt-level = 3
 
 [[bin]]
-name = "fuzz-rawhide-unwrapped"
-path = "src/unwrapped.rs"
+name = "fuzz-rawhide-decoders"
+path = "src/decoders.rs"
+
+[[bin]]
+name = "fuzz-rawhide-metadata"
+path = "src/metadata.rs"
