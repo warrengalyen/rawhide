@@ -27,12 +27,11 @@ macro_rules! alloc_image_plain {
       if $width * $height > 500000000 || $width > 50000 || $height > 50000 {
         panic!("rawhide: surely there's no such thing as a >500MP or >50000 px wide/tall image!");
       }
-      let mut out: Vec<u16> = if $dummy {
+      if $dummy {
         vec![0]
       } else {
         vec![0; $width * $height]
-      };
-      out
+      }
     }
   );
 }
@@ -40,7 +39,7 @@ macro_rules! alloc_image_plain {
 macro_rules! alloc_image {
   ($width:expr, $height:expr, $dummy: expr) => (
     {
-      let mut out = alloc_image_plain!($width, $height, $dummy);
+      let out = alloc_image_plain!($width, $height, $dummy);
       if $dummy {
         return out
       }
@@ -52,7 +51,7 @@ macro_rules! alloc_image {
 macro_rules! alloc_image_ok {
   ($width:expr, $height:expr, $dummy: expr) => (
     {
-      let mut out = alloc_image_plain!($width, $height, $dummy);
+      let out = alloc_image_plain!($width, $height, $dummy);
       if $dummy {
         return Ok(out)
       }
