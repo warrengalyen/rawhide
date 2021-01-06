@@ -36,7 +36,7 @@ pub struct RawImage {
   pub blackareas: Vec<(u64,u64,u64,u64)>,
   /// orientation of the image as indicated by the image metadata
   pub orientation: Orientation,
-  /// image data itself, has width*height*cpp elements
+  /// image data itself, has `width`\*`height`\*`cpp` elements
   pub data: RawImageData,
 }
 
