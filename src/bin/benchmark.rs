@@ -1,8 +1,6 @@
 use std::env;
 use std::error::Error;
 use std::fs::File;
-extern crate rawhide;
-extern crate time;
 
 fn usage() {
     println!("benchmark <file>");

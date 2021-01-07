@@ -1,8 +1,9 @@
-use decoders::*;
-use decoders::tiff::*;
-use decoders::basics::*;
 use std::f32::NAN;
 use std::cmp;
+
+use crate::decoders::*;
+use crate::decoders::tiff::*;
+use crate::decoders::basics::*;
 
 #[derive(Debug, Clone)]
 pub struct OrfDecoder<'a> {

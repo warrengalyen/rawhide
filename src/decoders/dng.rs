@@ -1,10 +1,11 @@
-use decoders::*;
-use decoders::tiff::*;
-use decoders::basics::*;
-use decoders::ljpeg::*;
-use decoders::cfa::*;
 use std::f32::NAN;
 use std::cmp;
+
+use crate::decoders::*;
+use crate::decoders::tiff::*;
+use crate::decoders::basics::*;
+use crate::decoders::ljpeg::*;
+use crate::decoders::cfa::*;
 
 #[derive(Debug, Clone)]
 pub struct DngDecoder<'a> {

@@ -1,8 +1,9 @@
-use decoders::*;
-use decoders::tiff::*;
-use decoders::basics::*;
-use decoders::ljpeg::*;
 use std::f32::NAN;
+
+use crate::decoders::*;
+use crate::decoders::tiff::*;
+use crate::decoders::basics::*;
+use crate::decoders::ljpeg::*;
 
 #[derive(Debug, Clone)]
 pub struct Cr2Decoder<'a> {

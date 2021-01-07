@@ -8,6 +8,7 @@ description = "A library to decode camera raw formats"
 repository = "https://github.com/warrengalyen/rawhide"
 license = "LGPL-2.1"
 categories = ["multimedia::images"]
+edition = "2018"
 
 build = "data/cameras/join.rs"
 

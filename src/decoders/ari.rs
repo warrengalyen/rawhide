@@ -1,6 +1,7 @@
-use decoders::*;
-use decoders::basics::*;
 use std::f32::NAN;
+
+use crate::decoders::*;
+use crate::decoders::basics::*;
 
 pub fn is_ari(buf: &[u8]) -> bool {
   buf[0..4] == b"ARRI"[..]

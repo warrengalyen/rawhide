@@ -1,5 +1,5 @@
-use decoders::*;
-use decoders::basics::*;
+use crate::decoders::*;
+use crate::decoders::basics::*;
 
 pub fn decode_unwrapped(buffer: &Buffer) -> Result<RawImageData,String> {
   let decoder = LEu16(&buffer.buf, 0);

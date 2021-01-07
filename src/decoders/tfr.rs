@@ -1,8 +1,9 @@
-use decoders::*;
-use decoders::tiff::*;
-use decoders::ljpeg::*;
-use decoders::basics::*;
 use std::f32::NAN;
+
+use crate::decoders::*;
+use crate::decoders::tiff::*;
+use crate::decoders::ljpeg::*;
+use crate::decoders::basics::*;
 
 #[derive(Debug, Clone)]
 pub struct TfrDecoder<'a> {
@@ -35,7 +36,7 @@ impl<'a> Decoder for TfrDecoder<'a> {
     } else {
       self.decode_compressed(src, width, height, dummy)?
     };
-    
+
     ok_image(camera, width, height, self.get_wb()?, image)
   }
 }

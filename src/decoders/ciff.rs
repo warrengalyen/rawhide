@@ -1,6 +1,8 @@
+use enum_primitive::{enum_from_primitive, enum_from_primitive_impl, enum_from_primitive_impl_ty};
 use std::collections::HashMap;
-use decoders::basics::*;
-use decoders::Buffer;
+
+use crate::decoders::basics::*;
+use crate::decoders::Buffer;
 
 enum_from_primitive! {
 #[derive(Debug, Copy, Clone, PartialEq)]

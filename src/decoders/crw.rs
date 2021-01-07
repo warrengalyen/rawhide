@@ -1,7 +1,9 @@
-use decoders::*;
-use decoders::ciff::*;
-use decoders::basics::*;
+use lazy_static::lazy_static;
 use std::f32::NAN;
+
+use crate::decoders::*;
+use crate::decoders::ciff::*;
+use crate::decoders::basics::*;
 
 // The decoding bits of this file were ported from dcraw. The code seems different enough
 // that it doesn't make sense to try and share the huffman stuff with the normal ljpeg code
@@ -44,7 +46,7 @@ impl CrwHuffTable {
     }
   }
 
-  fn get_bits(&self, pump: &mut BitPump) -> u32 {
+  fn get_bits(&self, pump: &mut dyn BitPump) -> u32 {
     let c = pump.peek_bits(self.nbits) as usize;
     let (len, leaf) = self.tbl[c];
     pump.consume_bits(len as u32);

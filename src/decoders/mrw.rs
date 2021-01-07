@@ -1,7 +1,8 @@
-use decoders::*;
-use decoders::tiff::*;
-use decoders::basics::*;
 use std::f32;
+
+use crate::decoders::*;
+use crate::decoders::tiff::*;
+use crate::decoders::basics::*;
 
 pub fn is_mrw(buf: &[u8]) -> bool {
   BEu32(buf,0) == 0x004D524D

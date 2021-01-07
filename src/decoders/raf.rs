@@ -1,7 +1,8 @@
-use decoders::*;
-use decoders::tiff::*;
-use decoders::basics::*;
 use std::f32::NAN;
+
+use crate::decoders::*;
+use crate::decoders::tiff::*;
+use crate::decoders::basics::*;
 
 #[derive(Debug, Clone)]
 pub struct RafDecoder<'a> {

@@ -1,6 +1,6 @@
-use decoders::basics::*;
-use decoders::ljpeg::huffman::*;
-use decoders::ljpeg::decompressors::*;
+use crate::decoders::basics::*;
+use crate::decoders::ljpeg::huffman::*;
+use crate::decoders::ljpeg::decompressors::*;
 
 pub mod huffman;
 mod decompressors;
