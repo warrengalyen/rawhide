@@ -58,6 +58,7 @@ pub struct HuffTable {
   bigtable: Vec<i32>,
   precision: usize,
   smalltable: Vec<Option<(u32,u32,u32)>>,
+  decodetable: Vec<Option<(u32,i32)>>,
   pub use_bigtable: bool,
   pub dng_bug: bool,
   pub initialized: bool,
@@ -111,6 +112,7 @@ impl HuffTable {
       bigtable: Vec::new(),
       precision: precision,
       smalltable: Vec::new(),
+      decodetable: Vec::new(),
       use_bigtable: true,
       dng_bug: false,
       initialized: false,
@@ -129,6 +131,7 @@ impl HuffTable {
       numshift: [0;1<<SMALL_TABLE_BITS],
       bigtable: Vec::new(),
       precision: precision,
+      decodetable: Vec::new(),
       smalltable: Vec::new(),
       use_bigtable: true,
       dng_bug: dng_bug,
@@ -225,28 +228,51 @@ impl HuffTable {
       }
     }
 
-     // Bootstrap the small table with the slow code
-     let mut pump = MockPump::empty();
-     self.smalltable = vec![None; 1 << SMALL_TABLE_BITS];
-     let mut i = 0;
-     loop {
-       pump.set(i, SMALL_TABLE_BITS);
-       let res = self.huff_len_slow(&mut pump);
-       let validbits = pump.validbits();
-       if validbits >= 0 {
-         // We had a valid decode within the lookup bits, save that result to
-         // every position where the decode applies.
-         for _ in 0..(1 << validbits) {
-           self.smalltable[i as usize] = Some(res);
-           i += 1;
-         }
-       } else {
-         i += 1;
-       }
-       if i >= 1 << SMALL_TABLE_BITS {
-         break;
-       }
-     }
+    // Bootstrap the small table with the slow code
+    let mut pump = MockPump::empty();
+    self.smalltable = vec![None; 1 << SMALL_TABLE_BITS];
+    let mut i = 0;
+    loop {
+      pump.set(i, SMALL_TABLE_BITS);
+      let res = self.huff_len_slow(&mut pump);
+      let validbits = pump.validbits();
+      if validbits >= 0 {
+        // We had a valid decode within the lookup bits, save that result to
+        // every position where the decode applies.
+        for _ in 0..(1 << validbits) {
+          self.smalltable[i as usize] = Some(res);
+          i += 1;
+        }
+      } else {
+        i += 1;
+      }
+      if i >= 1 << SMALL_TABLE_BITS {
+        break;
+      }
+    }
+
+    // Now bootstrap the full decode table
+    let mut pump = MockPump::empty();
+    self.decodetable = vec![None; 1 << BIG_TABLE_BITS];
+    let mut i = 0;
+    loop {
+      pump.set(i, BIG_TABLE_BITS);
+      let res = self.huff_decode_slow(&mut pump);
+      let validbits = pump.validbits();
+      if validbits >= 0 {
+        // We had a valid decode within the lookup bits, save that result to
+        // every position where the decode applies.
+        for _ in 0..(1 << validbits) {
+          self.decodetable[i as usize] = Some(res);
+          i += 1;
+        }
+      } else {
+        i += 1;
+      }
+      if i >= 1 << BIG_TABLE_BITS {
+        break;
+      }
+    }
 
     if use_bigtable {
       self.initialize_bigtable();
@@ -383,24 +409,34 @@ impl HuffTable {
   // it as a special case.
   // TODO: add BigTable support for the shifts to speed up NEF
   pub fn huff_decode_nef(&self, pump: &mut dyn BitPump) -> Result<i32,String> {
-    let len = self.huff_len_nef(pump);
-    let diff = self.huff_diff_nef(pump, len);
-    Ok(diff)
-  }
-
-  pub fn huff_len_nef(&self, pump: &mut dyn BitPump) -> (u32,u32) {
-    let code = pump.peek_bits(SMALL_TABLE_BITS) as usize;
-    if let Some((bits,len,shift)) = self.smalltable[code] {
+    let code = pump.peek_bits(BIG_TABLE_BITS) as usize;
+    if let Some((bits,decode)) = self.decodetable[code] {
       pump.consume_bits(bits);
-      (len, shift)
+      Ok(decode)
     } else {
-      let res = self.huff_len_slow(pump);
-      (res.1, res.2)
+      let decode = self.huff_decode_slow(pump);
+      Ok(decode.1)
     }
   }
 
-  pub fn huff_diff_nef(&self, pump: &mut dyn BitPump, input: (u32,u32)) -> i32 {
-    let (len, shift) = input;
+  pub fn huff_decode_slow(&self, pump: &mut dyn BitPump) -> (u32,i32) {
+    let len = self.huff_len_nef(pump);
+    (len.0+len.1, self.huff_diff_nef(pump, len))
+  }
+
+  pub fn huff_len_nef(&self, pump: &mut dyn BitPump) -> (u32,u32,u32) {
+    let code = pump.peek_bits(SMALL_TABLE_BITS) as usize;
+    if let Some((bits,len,shift)) = self.smalltable[code] {
+      pump.consume_bits(bits);
+      (bits, len, shift)
+    } else {
+      let res = self.huff_len_slow(pump);
+      self.huff_len_slow(pump)
+    }
+  }
+
+  pub fn huff_diff_nef(&self, pump: &mut dyn BitPump, input: (u32,u32,u32)) -> i32 {
+    let (_, len, shift) = input;
 
     if len == 0 {
       return 0;
