@@ -162,7 +162,7 @@ dependencies = [
 
 [[package]]
 name = "rawhide"
-version = "0.35.6"
+version = "0.35.7"
 dependencies = [
  "byteorder",
  "enumn",
