@@ -1,5 +1,4 @@
 use std::env;
-use std::error::Error;
 use std::fs::File;
 use std::time::Instant;
 
@@ -26,7 +25,7 @@ fn main() {
     let mut f = match File::open(file) {
         Ok(val) => val,
         Err(e) => {
-            error(e.description());
+            error(&e.to_string());
             return;
         }
     };
