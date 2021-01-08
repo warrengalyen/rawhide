@@ -124,7 +124,6 @@ pub fn decode(reader: &mut dyn Read) -> Result<RawImage, RawHideError> {
 #[doc(hidden)]
 pub fn force_initialization() {
   lazy_static::initialize(&LOADER);
-  lazy_static::initialize(&decoders::CRW_HUFF_TABLES);
   lazy_static::initialize(&decoders::SNEF_CURVE);
 }
 
